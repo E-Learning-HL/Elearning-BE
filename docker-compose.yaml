@@ -1,0 +1,60 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:13.2-alpine
+    container_name: elearningdb
+    hostname: db
+    ports:
+      - 5432:5432
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+      - POSTGRES_DB=db_elearning
+      - POSTGRES_USER=elearning
+      - POSTGRES_PASSWORD=123456caA@
+    restart: always
+    networks:
+      - app-network
+    volumes:
+      - ./db/data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'elearning', '-d', 'db_elearning']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: api
+    hostname: api
+    ports:
+      - 3000:3000
+    networks:
+      - app-network
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    volumes:
+      - .env/:/app/.env
+    restart: unless-stopped
+    # depends_on:
+    #   - db
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis/redis_data:/data
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - app-network
+      
+networks:
+  app-network:
+    external: true
+    name: app-network
+    driver: bridge
+
+volumes:
+  db_data:
