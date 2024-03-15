@@ -1,4 +1,4 @@
-# Odin backend eLearning Platform
+# HL backend eLearning Platform
 
 ![github action status](https://github.com/brocoders/nestjs-boilerplate/actions/workflows/docker-e2e.yml/badge.svg)
 [![renovate](https://img.shields.io/badge/renovate-enabled-%231A1F6C?logo=renovatebot)](https://app.renovatebot.com/dashboard)
@@ -173,14 +173,14 @@ For working with database migration, seeds, locates to the `database` folder and
 
 ## Git convention:
 
-<i>To protect main source code, please don't directly push your code to `master` branch.</i>
+<i>To protect main source code, please don't directly push your code to `main` branch.</i>
 
-There are two branches: `master` branch and `development` branch
+There are two branches: `main` branch and `development` branch
 
-- The `master` branch stores the production code.
+- The `main` branch stores the production code.
 - The `development` one contains the code that is in development.
 
-We are developers, so we should use `development` branch and left `master` for leader BaoLe
+We are developers, so we should use `development` branch and left `master` for leader DuyLinh
 
 ### For developement phase
 
@@ -192,12 +192,12 @@ We are developers, so we should use `development` branch and left `master` for l
 
 For example:
 
-- If I am adding some feature to our source code, I can name my branch to: `dev/mndoan/feature` or `dev/mndoan/feature-orm`
+- If I am adding some feature to our source code, I can name my branch to: `dev/vdlinh/feature` or `dev/vdlinh/feature-orm`
 
 ### Pushing code to repository also needs to follow some rules
 
 Add your `prefix` before any commiting message along with an optional information such as `add`, `remove`, `fix`... before pushing it to Git.
 
-Example: if I am currently in branch `dev/mndoan/feature` and I have done defining ORM for entities, I would commit with this message:
+Example: if I am currently in branch `dev/vdlinh/feature` and I have done defining ORM for entities, I would commit with this message:
 
 `git commit -m "feature/add: Define entities interface."`
