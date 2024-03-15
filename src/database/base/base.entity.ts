@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { AbstractDto } from './dto.dto';
-import { User } from 'src/modules/res/res.user/entities/user.entity';
+import { User } from 'src/modules/users/entities/user.entity';
 
 export abstract class AbstractEntity {
   abstract toDto(): AbstractDto;
