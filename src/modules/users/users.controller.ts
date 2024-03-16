@@ -21,6 +21,7 @@ export class UsersController {
 
 
   @Post('create-user')
+  @UseGuards(JwtAuthGuard)
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
