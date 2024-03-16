@@ -14,7 +14,7 @@ export class AuthService {
     async validateUser(email: string, password: string): Promise<any> {
         const user = await this.usersService.findOneByEmail(email);
         if (user) {
-            const isValid = this.usersService.isValidPass(password, user.password)
+            const isValid = await bcrypt.compare(password, user.password);
             if (isValid === true) {
                 return user;
             }
@@ -22,19 +22,22 @@ export class AuthService {
         return null;
     }
 
-    async login(user: any) {
-        const payload = { username: user.email, sub: user.id };
-        return await {
+    async login(user: any){
+        const payload = { 
+            username: user.email, 
+            sub: user.id 
+        };
+        return  {
             status: 200,
             data:{
-                access_token: this.jwtService.sign(payload),
-                user_id: user.id
+                accessToken: this.jwtService.sign(payload),
+                userId: user.id
             }
         };
     }
 
     async register(createUserDto: CreateUserDto) {
-        const hashedPassword = bcrypt.hashSync(createUserDto.password, 10);
+        const hashedPassword = bcrypt.hashSync(createUserDto.password, 8);
         const user = await this.usersService.create({
           ...createUserDto,
           password: hashedPassword,

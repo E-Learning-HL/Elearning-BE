@@ -1,4 +1,11 @@
-import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UnauthorizedException,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -15,7 +22,9 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto) {
-    const existingUser = await this.usersService.findOneByEmail(createUserDto.email);
+    const existingUser = await this.usersService.findOneByEmail(
+      createUserDto.email,
+    );
     if (existingUser) {
       throw new UnauthorizedException('Email already registered');
     }
@@ -24,6 +33,14 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() user: User) {
-    return this.authService.login(user);
+    const loggedInUser = await this.authService.validateUser(
+      user.email,
+      user.password,
+    );
+    if (!loggedInUser) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    console.log(loggedInUser);
+    return this.authService.login(loggedInUser);
   }
 }

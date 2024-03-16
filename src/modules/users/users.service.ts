@@ -29,26 +29,26 @@ export class UsersService {
     return this.usersRepository.find();
   }
 
-  findOneByEmail(email: string) {
+  findOneByEmail(email: string) : Promise<User | null> {
     const user = this.usersRepository.findOne({
-      where: { email },
+      where: { email : email },
     });
+    console.log(user)
     return user;
   }
 
-  isValidPass(password: string, hash: string) {
-    if (password == hash) 
-      return true;
-    return false;
+  findById(id: number)  : Promise<User | undefined>  {
+    const user =  this.usersRepository.findOneOrFail({
+      where : {id : id},
+      select : ['name', 'email', 'phone', 'address', 'isActive']
+    })
+
+    return user
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
+  // update(id: number, updateUserDto: UpdateUserDto) {
+  //   return `This action updates a #${id} user`;
+  // }
 
   async remove(id: number) : Promise<void> {
     await this.usersRepository.delete(id);
