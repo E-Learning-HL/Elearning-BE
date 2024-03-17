@@ -20,6 +20,7 @@ export class UsersService {
     private usersRepository: Repository<User>,
     private datasource: DataSource,
   ) {}
+
   async create(createUserDto: CreateUserDto): Promise<User> {
     try {
       return await this.usersRepository.save(createUserDto);
@@ -30,7 +31,6 @@ export class UsersService {
       );
     }
   }
-
 
   async getList(
     page: number = 1,
@@ -51,16 +51,16 @@ export class UsersService {
       take: limit,
     };
 
-    const keyword = search.trim()
+    const keyword = search.trim();
     if (keyword !== '') {
       searchCondition.where = [
         { email: Like(`%${keyword}%`) },
         { name: Like(`%${keyword}%`) },
-      ]
+      ];
     }
 
     const [users, count] = await this.usersRepository.findAndCount(
-      searchCondition
+      searchCondition,
     );
 
     return {
@@ -75,7 +75,7 @@ export class UsersService {
     const user = this.usersRepository.findOne({
       where: { email: email },
     });
-    console.log(user);
+    // console.log(user);
     return user;
   }
 
@@ -88,9 +88,33 @@ export class UsersService {
     return user;
   }
 
-  // update(id: number, updateUserDto: UpdateUserDto) {
-  //   return `This action updates a #${id} user`;
-  // }
+  async updateUser(id: number, updateUserDto: UpdateUserDto) : Promise<User | undefined> {
+    const user = await this.usersRepository.findOne({
+      where : {id : id}
+    })
+
+    if(!user){
+      throw new NotFoundException({
+        message : "User not found",
+        status : HttpStatus.NOT_FOUND
+      })
+    }
+    user.name = updateUserDto.name
+    user.address = updateUserDto.address
+    user.phone = updateUserDto.phone
+    user.isActive = updateUserDto.isActive
+    
+    if(updateUserDto.password){
+      const password = await bcrypt.hash(updateUserDto.password, 10)
+      user.password = password
+    }
+
+    try {
+      return await this.usersRepository.save(user)
+    } catch (error){
+      throw new HttpException('Failed to save user', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 
   async remove(id: number): Promise<void> {
     await this.usersRepository.delete(id);
@@ -108,7 +132,11 @@ export class UsersService {
     }
     user.isActive = isActive;
 
-    return this.usersRepository.save(user);
+    try {
+      return await this.usersRepository.save(user)
+    } catch (error){
+      throw new HttpException('Failed to save user', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   async changePasswordUser(
@@ -136,6 +164,11 @@ export class UsersService {
     }
 
     user.password = await bcrypt.hash(newPassword, 10);
-    return this.usersRepository.save(user);
+
+    try {
+      return await this.usersRepository.save(user)
+    } catch (error){
+      throw new HttpException('Failed to save user', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

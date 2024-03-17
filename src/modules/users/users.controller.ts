@@ -14,24 +14,51 @@ import {
   HttpStatus,
   Query,
   DefaultValuePipe,
+  HttpException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ChangePassDTO } from './dto/change-password.dto';
 import { User } from './entities/user.entity';
+import * as bcrypt from 'bcryptjs';
 
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post('create-user')
   @UseGuards(JwtAuthGuard)
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    const existingUser = await this.usersService.findOneByEmail(
+      createUserDto.email,
+    );
+    if (existingUser) {
+      throw new UnauthorizedException('Email already registered');
+    }
+
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    try {
+      const user = this.usersService.create({
+        ...createUserDto,
+        password: hashedPassword,
+      });
+
+      return {
+        message: 'User created successfully',
+        status: HttpStatus.OK,
+        user,
+      };
+    } catch (error) {
+      throw new HttpException(
+        'Failed to create user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @UseGuards(JwtAuthGuard)
@@ -41,11 +68,30 @@ export class UsersController {
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
     @Query('search') search: string,
     @Query('sort') sort: 'ASC' | 'DESC',
-  ) : Promise<{ count: number, currentPage: number, perpage: number, data: User[] }> {
-    if(!search){
-      search = ''
+  ): Promise<{
+    count: number;
+    currentPage: number;
+    perpage: number;
+    data: User[];
+  }> {
+    if (!search) {
+      search = '';
     }
-    return this.usersService.getList(page, limit, search, sort);
+
+    try {
+      const userList = await this.usersService.getList(
+        page,
+        limit,
+        search,
+        sort,
+      );
+      return userList;
+    } catch (error) {
+      throw new HttpException(
+        'Failed to get list user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @UseGuards(JwtAuthGuard)
@@ -54,16 +100,32 @@ export class UsersController {
     return this.usersService.findById(id);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.usersService.update(id, updateUserDto);
-  // }
-
   @UseGuards(JwtAuthGuard)
-  @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.usersService.remove(id);
+  @Put(':id')
+  async updateUser(
+    @Param('id') id: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<any> {
+    try {
+      // Gọi phương thức của service để cập nhật thông tin người dùng
+      const updatedUser = await this.usersService.updateUser(id, updateUserDto);
+      return {
+        message: 'User updated successfully',
+        user: updatedUser,
+      };
+    } catch (error) {
+      throw new HttpException(
+        'Failed to update user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
+
+  // @UseGuards(JwtAuthGuard)
+  // @Delete(':id')
+  // remove(@Param('id') id: number) {
+  //   return this.usersService.remove(id);
+  // }
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id/activate')
@@ -73,8 +135,8 @@ export class UsersController {
       throw new NotFoundException('User not found');
     }
     return {
-      status : HttpStatus.OK,
-      message: 'User activated successfully' 
+      status: HttpStatus.OK,
+      message: 'User activated successfully',
     };
   }
 
@@ -86,8 +148,8 @@ export class UsersController {
       throw new NotFoundException('User not found');
     }
     return {
-      status : HttpStatus.OK,
-      message: 'User deactivated successfully' 
+      status: HttpStatus.OK,
+      message: 'User deactivated successfully',
     };
   }
 
@@ -114,9 +176,9 @@ export class UsersController {
       throw new NotFoundException('User not found');
     }
 
-    return  { 
-      status : HttpStatus.OK, 
-      message: 'Password changed successfully' 
+    return {
+      status: HttpStatus.OK,
+      message: 'Password changed successfully',
     };
   }
 }
