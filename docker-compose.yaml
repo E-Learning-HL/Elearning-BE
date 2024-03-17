@@ -34,6 +34,7 @@ services:
       - TZ=Asia/Ho_Chi_Minh
     volumes:
       - .env/:/app/.env
+      - ./src:/app/src
     restart: unless-stopped
     # depends_on:
     #   - db

@@ -3,14 +3,15 @@ import {
   Post,
   Body,
   UnauthorizedException,
-  Req,
-  Res,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { User } from '../users/entities/user.entity';
 import { ApiTags } from '@nestjs/swagger';
+import { AuthLoginDTO } from './dto/auth-login.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -32,15 +33,15 @@ export class AuthController {
   }
 
   @Post('login')
-  async login(@Body() user: User) {
+  async login(@Body() loginDto : AuthLoginDTO) {
     const loggedInUser = await this.authService.validateUser(
-      user.email,
-      user.password,
+      loginDto.email,
+      loginDto.password,
     );
     if (!loggedInUser) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new HttpException('Invalid email or password', HttpStatus.BAD_REQUEST);
     }
-    console.log(loggedInUser);
+    
     return this.authService.login(loggedInUser);
   }
 }
