@@ -30,6 +30,7 @@ import * as bcrypt from 'bcryptjs';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   @Post('create-user')
   @UseGuards(JwtAuthGuard)
@@ -61,6 +62,7 @@ export class UsersController {
     }
   }
 
+  @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   @Get('/list')
   async getList(
@@ -94,12 +96,14 @@ export class UsersController {
     }
   }
 
+  @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.usersService.findById(id);
   }
 
+  @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   @Put(':id')
   async updateUser(
@@ -127,6 +131,7 @@ export class UsersController {
   //   return this.usersService.remove(id);
   // }
 
+  @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   @Patch(':id/activate')
   async activateUser(@Param('id', ParseIntPipe) id: number) {
@@ -140,6 +145,7 @@ export class UsersController {
     };
   }
 
+  @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   @Patch(':id/deactivate')
   async deactivateUser(@Param('id', ParseIntPipe) id: number) {
@@ -153,6 +159,7 @@ export class UsersController {
     };
   }
 
+  @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   @Patch(':id/change-password')
   async changePassword(
