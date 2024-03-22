@@ -8,15 +8,13 @@ import { ApiTags } from '@nestjs/swagger';
 export class FileController {
   constructor(
     private readonly fileService: FileService,
-    
     ) {}
 
-  @Post()
-  @UseInterceptors(FileInterceptor('file'))
-  uploadFile(@UploadedFile() file : Express.Multer.File ) {
-    // return this.fileService.
-    console.log(file)
-  }
+    @Post()
+    async uploadVideo(@Body() body: { base64Data: string, filename: string }): Promise<string> {
+      const { base64Data, filename } = body;
+      return await this.fileService.uploadBase64File(base64Data, filename);
+    }
 
   
 }

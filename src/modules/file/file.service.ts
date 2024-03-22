@@ -6,31 +6,28 @@ import { v4 as uuid } from 'uuid';
 import { ConfigService } from '@nestjs/config';
 import { AllConfigType, MinioConfig } from 'src/common/config/config.type';
 import { Readable } from 'stream';
-import { MinioClient } from 'nestjs-minio-client';
+import { MinioClient, MinioService } from 'nestjs-minio-client';
 
 @Injectable()
 export class FileService {
   private readonly minioClient: MinioClient;
-  private readonly minioConfig: MinioConfig;
+  private readonly minioConfig!: MinioConfig;
 
-  constructor(private readonly configService: ConfigService) {
-      this.minioConfig = this.configService.get<MinioConfig>('minio');
-      this.minioClient = new Minio.Client({
-      endPoint: this.minioConfig.host,
-      port: this.minioConfig.port,
-      useSSL: this.minioConfig.useSSL,
-      accessKey: this.minioConfig.accessKey,
-      secretKey: this.minioConfig.secretKey,
-    });
-  }
+  constructor(
+    private readonly config: ConfigService,
+    private readonly minio: MinioService,
+    ) {}
 
-  async uploadBase64File(base64Data: string, bucketName: string, filename: string): Promise<string> {
+  async uploadBase64File(
+    base64Data: string,
+    filename: string,
+  ): Promise<string> {
     const buffer = Buffer.from(base64Data, 'base64');
     const stream = bufferToStream(buffer);
+    const bucketName = this.config.get<MinioConfig>('minio.bucketName')?.toString() || 'elearning';
     await this.minioClient.putObject(bucketName, filename, stream);
     return `File uploaded successfully: ${filename}`;
   }
-
 }
 
 function bufferToStream(buffer) {
@@ -39,4 +36,3 @@ function bufferToStream(buffer) {
   stream.push(null);
   return stream;
 }
-
