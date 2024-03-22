@@ -50,6 +50,19 @@ services:
     command: redis-server /usr/local/etc/redis/redis.conf
     networks:
       - app-network
+
+  minio:
+    image: 'bitnami/minio:latest'
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=elearning
+      - MINIO_ROOT_PASSWORD=123456caA@
+      - MINIO_ACCESS_KEY=elearning
+      - MINIO_SECRET_KEY=123456caA@
+    networks:
+      - app-network
       
 networks:
   app-network:

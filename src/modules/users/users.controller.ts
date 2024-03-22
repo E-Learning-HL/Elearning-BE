@@ -24,6 +24,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ChangePassDTO } from './dto/change-password.dto';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcryptjs';
+import { UpdateStatusUserDto } from './dto/update-status-user.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -33,7 +34,6 @@ export class UsersController {
   @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   @Post('create-user')
-  @UseGuards(JwtAuthGuard)
   async create(@Body() createUserDto: CreateUserDto) {
     const existingUser = await this.usersService.findOneByEmail(
       createUserDto.email,
@@ -111,7 +111,6 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<any> {
     try {
-      // Gọi phương thức của service để cập nhật thông tin người dùng
       const updatedUser = await this.usersService.updateUser(id, updateUserDto);
       return {
         message: 'User updated successfully',
@@ -133,46 +132,30 @@ export class UsersController {
 
   @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
-  @Patch(':id/activate')
-  async activateUser(@Param('id', ParseIntPipe) id: number) {
-    const updatedUser = await this.usersService.updateUserStatus(id, true);
-    if (!updatedUser) {
-      throw new NotFoundException('User not found');
-    }
-    return {
-      status: HttpStatus.OK,
-      message: 'User activated successfully',
-    };
+  @Patch('status/:id')
+  async activateUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateStatusUserDto : UpdateStatusUserDto,
+    ) {
+      const {isActive} = updateStatusUserDto;
+      const updatedUser = await this.usersService.updateUserStatus(id, isActive);
+      if (!updatedUser) {
+        throw new NotFoundException('User not found');
+      }
+      return {
+        status: HttpStatus.OK,
+        message: isActive ? 'User activated successfully' : 'User deactivated successfully',
+      };
   }
 
   @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
-  @Patch(':id/deactivate')
-  async deactivateUser(@Param('id', ParseIntPipe) id: number) {
-    const updatedUser = await this.usersService.updateUserStatus(id, false);
-    if (!updatedUser) {
-      throw new NotFoundException('User not found');
-    }
-    return {
-      status: HttpStatus.OK,
-      message: 'User deactivated successfully',
-    };
-  }
-
-  @ApiBearerAuth('access-token')
-  @UseGuards(JwtAuthGuard)
-  @Patch(':id/change-password')
+  @Patch('change-password/:id')
   async changePassword(
     @Param('id', ParseIntPipe) id: number,
     @Body() changePassDto: ChangePassDTO,
   ) {
-    const { oldPassword, newPassword, confirmPassword } = changePassDto;
-
-    if (newPassword != confirmPassword) {
-      throw new UnauthorizedException(
-        'New password and confirm password do not match',
-      );
-    }
+    const { oldPassword, newPassword } = changePassDto;
 
     const updatePassword = await this.usersService.changePasswordUser(
       id,
