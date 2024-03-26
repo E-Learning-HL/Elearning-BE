@@ -2,11 +2,15 @@ import { BaseEntity } from 'src/database/base/base.entity';
 import { Enrolment } from 'src/modules/enrolments/entities/enrolment.entity';
 import { Section } from 'src/modules/sections/entities/section.entity';
 import { Payment } from 'src/modules/payments/entities/payment.entity';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Assignment } from 'src/modules/assignments/entities/assignment.entity';
+import { FileEntity } from 'src/modules/file/entities/file.entity';
 
 @Entity('courses')
 export class Course extends BaseEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
   @Column({
     nullable: true,
     name: 'name_course',
@@ -22,12 +26,6 @@ export class Course extends BaseEntity {
     nullable: true,
   })
   introduce: string;
-
-  @Column({
-    nullable: true,
-    name: 'image_url',
-  })
-  imageUrl: string;
 
   @Column({
     nullable: true,
@@ -47,4 +45,7 @@ export class Course extends BaseEntity {
 
   @OneToMany(() => Payment, (payment) => payment.course)
   payment: Payment[];
+
+  @OneToMany(() => FileEntity, (file) => file.course)
+  file: FileEntity[];
 }

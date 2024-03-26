@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FileEntity } from './entities/file.entity';
+import { FileE } from './entities/file.entity';
 import { Repository } from 'typeorm';
 import { AllConfigType } from 'src/common/config/config.type';
 
@@ -9,13 +9,13 @@ import { AllConfigType } from 'src/common/config/config.type';
 export class FilesService {
   constructor(
     private readonly configService: ConfigService<AllConfigType>,
-    @InjectRepository(FileEntity)
-    private readonly fileRepository: Repository<FileEntity>,
+    @InjectRepository(FileE)
+    private readonly fileRepository: Repository<FileE>,
   ) {}
 
   async uploadFile(
     file: Express.Multer.File | Express.MulterS3.File,
-  ): Promise<FileEntity> {
+  ): Promise<FileE> {
     if (!file) {
       throw new HttpException(
         {

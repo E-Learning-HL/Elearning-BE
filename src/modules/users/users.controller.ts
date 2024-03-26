@@ -20,7 +20,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ChangePassDTO } from './dto/change-password.dto';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcryptjs';
@@ -64,6 +64,10 @@ export class UsersController {
 
   @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
+  @ApiQuery({ name: 'page', required: false, type: String })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'sort', required: false, type: String })
   @Get('/list')
   async getList(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
@@ -135,17 +139,19 @@ export class UsersController {
   @Patch('status/:id')
   async activateUser(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateStatusUserDto : UpdateStatusUserDto,
-    ) {
-      const {isActive} = updateStatusUserDto;
-      const updatedUser = await this.usersService.updateUserStatus(id, isActive);
-      if (!updatedUser) {
-        throw new NotFoundException('User not found');
-      }
-      return {
-        status: HttpStatus.OK,
-        message: isActive ? 'User activated successfully' : 'User deactivated successfully',
-      };
+    @Body() updateStatusUserDto: UpdateStatusUserDto,
+  ) {
+    const { isActive } = updateStatusUserDto;
+    const updatedUser = await this.usersService.updateUserStatus(id, isActive);
+    if (!updatedUser) {
+      throw new NotFoundException('User not found');
+    }
+    return {
+      status: HttpStatus.OK,
+      message: isActive
+        ? 'User activated successfully'
+        : 'User deactivated successfully',
+    };
   }
 
   @ApiBearerAuth('access-token')

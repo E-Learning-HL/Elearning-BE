@@ -8,8 +8,9 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 export class Section extends BaseEntity {
   @Column({
     nullable: true,
+    name : 'name_section'
   })
-  nameLesson: string;
+  nameSection: string;
 
   @ManyToOne(() => Course, (course) => course.section)
   @JoinColumn({ name: 'course_id' })

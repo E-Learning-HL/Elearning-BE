@@ -1,30 +1,37 @@
-import { BaseEntity } from "src/database/base/base.entity";
-import { Course } from "src/modules/courses/entities/course.entity";
-import { ExamItem } from "src/modules/exam_items/entities/exam_item.entity";
-import { Section } from "src/modules/sections/entities/section.entity";
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
+import { BaseEntity } from 'src/database/base/base.entity';
+import { Course } from 'src/modules/courses/entities/course.entity';
+import { Task } from 'src/modules/tasks/entities/task.entity';
+import { Section } from 'src/modules/sections/entities/section.entity';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity('assignments')
 export class Assignment extends BaseEntity {
-    @Column({
-        nullable: true,
-        name: 'name_assignment'
-    })
-    nameAssignment: string;
+  @Column({
+    nullable: true,
+    name: 'name_assignment',
+  })
+  nameAssignment: string;
 
-    @Column({
-        nullable: true,
-    })
-    order: number;
+  @Column({
+    nullable: true,
+  })
+  order: number;
 
-    @ManyToOne(() => Course, course => course.assignment )
-    @JoinColumn({name: 'course_id'})
-    course: Course;
+  @Column({
+    nullable: true,
+    default: true,
+    name: 'is_active',
+  })
+  isActive: boolean;
 
-    @ManyToOne(() => Section, section => section.assignment )
-    @JoinColumn({name: 'section_id'})
-    section: Section;
+  @ManyToOne(() => Course, (course) => course.assignment)
+  @JoinColumn({ name: 'course_id' })
+  course: Course;
 
-    @OneToMany(() => ExamItem, examItem => examItem.assignment)
-    examItem : ExamItem[];
+  @ManyToOne(() => Section, (section) => section.assignment)
+  @JoinColumn({ name: 'section_id' })
+  section: Section;
+
+  @OneToMany(() => Task, (task) => task.assignment)
+  task: Task[];
 }

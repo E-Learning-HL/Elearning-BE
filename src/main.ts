@@ -11,6 +11,7 @@ import { useContainer } from 'class-validator';
 import { AppModule } from './app.module';
 import validationOptions from './utils/validation-options';
 import { AllConfigType } from './common/config/config.type';
+import express from 'express';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
@@ -41,6 +42,14 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, options);
     SwaggerModule.setup('api/docs', app, document);
   }
+
+  app.use(express.json({ limit: '5000mb' })); //For JSON requests
+  app.use(
+    express.urlencoded({
+      limit: '5000mb',
+      extended: false,
+    }),
+  );
 
   const PORT = configService.getOrThrow('app.port', { infer: true });
 

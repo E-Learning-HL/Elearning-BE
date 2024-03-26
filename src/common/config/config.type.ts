@@ -80,11 +80,11 @@ export type TwitterConfig = {
 };
 
 export type MinioConfig = {
-  host?: string;
+  endPoint?: string;
   port?: number;
   accessKey?: string;
   secretKey?:string;
-  bucket?: string;
+  bucketName?: string;
   useSSL?: boolean;
 }
 

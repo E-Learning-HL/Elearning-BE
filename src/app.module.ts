@@ -39,13 +39,13 @@ import { FilesModule } from './common/files/files.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CoursesModule } from './modules/courses/courses.module';
-import { LessonsModule } from './modules/sections/sections.module';
+import { SectionsModule } from './modules/sections/sections.module';
 import { EnrolmentsModule } from './modules/enrolments/enrolments.module';
-import { LessonItemsModule } from './modules/lessons/lessons.module';
+import { LessonsModule } from './modules/lessons/lessons.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { PaymentMethodsModule } from './modules/payment_methods/payment_methods.module';
 import { AssignmentsModule } from './modules/assignments/assignments.module';
-import { ExamItemsModule } from './modules/exam_items/exam_items.module';
+import { ExamItemsModule } from './modules/tasks/tasks.module';
 import { ExamTypesModule } from './modules/exam_types/exam_types.module';
 import { FileModule } from './modules/file/file.module';
 import minioConfig from './common/config/minio.config';
@@ -65,7 +65,7 @@ import { MinioModule } from 'nestjs-minio-client';
         // googleConfig,
         // twitterConfig,
         // appleConfig,
-        minioConfig
+        minioConfig,
       ],
       envFilePath: ['.env'],
     }),
@@ -120,7 +120,7 @@ import { MinioModule } from 'nestjs-minio-client';
     CoursesModule,
     LessonsModule,
     EnrolmentsModule,
-    LessonItemsModule,
+    SectionsModule,
     PaymentsModule,
     PaymentMethodsModule,
     AssignmentsModule,

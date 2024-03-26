@@ -1,49 +1,45 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNumber, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsNumber, IsString } from 'class-validator';
 
-class Video{
+class File {
   @ApiProperty()
   response: string;
 
   @ApiProperty()
-  uid: string
-}
-
-class Image{
-  @ApiProperty()
-  response: string;
+  type: string;
 
   @ApiProperty()
-  uid: string
+  name: string;
 }
 
-class LessonItem{
+class Lesson {
   @ApiProperty()
   @IsString()
-  nameLessonItem: string;
+  name: string;
 
   @ApiProperty({
-    type : [Video]
+    type: [File],
   })
-  videos: Video[];
-
+  @IsArray()
+  video: File[];
 }
 
-class Lessson{
+class Section {
   @ApiProperty()
   @IsString()
-  nameLesson: string;
+  section_name: string;
 
   @ApiProperty({
-    type : [LessonItem]
+    type: [Lesson],
   })
-  lessonItems: LessonItem[];
+  @IsArray()
+  lessons: Lesson[];
 }
 
 export class CreateCourseDto {
   @ApiProperty()
   @IsString()
-  nameCourse: string;
+  name: string;
 
   @ApiProperty()
   @IsNumber()
@@ -53,22 +49,19 @@ export class CreateCourseDto {
   @IsString()
   introduce: string;
 
-  @ApiProperty({
-    type : [Image]
-  })
-  images: Image[];
-
-  @ApiProperty()
-  @IsBoolean()
-  isActive: boolean;
+  // @ApiProperty()
+  // @IsBoolean()
+  // isActive: boolean;
 
   @ApiProperty({
-    type : [Lessson]
+    type: [File],
   })
-  lessons: Lessson[];
+  @IsArray()
+  cover: File[];
 
-  
+  @ApiProperty({
+    type: [Section],
+  })
+  @IsArray()
+  course_section: Section[];
 }
-
-
-

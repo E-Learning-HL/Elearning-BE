@@ -45,7 +45,7 @@ export default registerAs<MinioConfig>('minio', () => {
   return {
     accessKey: process.env.MINIO_ACCESSKEY || 'elearning',
     secretKey: process.env.MINIO_SECRETKEY || '123456caA@',
-    host: process.env.MINIO_HOST || 'localhost',
+    endPoint: process.env.MINIO_HOST || 'localhost',
     port: process.env.MINIO_PORT ? parseInt(process.env.MINIO_PORT) : 9000,
     bucketName: process.env.MINIO_BUCKET || 'elearning',
     useSSL: process.env.MINIO_SSL === 'false',

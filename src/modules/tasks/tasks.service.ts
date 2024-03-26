@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { CreateExamItemDto } from './dto/create-exam_item.dto';
-import { UpdateExamItemDto } from './dto/update-exam_item.dto';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 
 @Injectable()
-export class ExamItemsService {
-  create(createExamItemDto: CreateExamItemDto) {
+export class TasksService {
+  create(createTaskDto: CreateTaskDto) {
     return 'This action adds a new examItem';
   }
 
@@ -16,7 +16,7 @@ export class ExamItemsService {
     return `This action returns a #${id} examItem`;
   }
 
-  update(id: number, updateExamItemDto: UpdateExamItemDto) {
+  update(id: number, updateTaskDto: UpdateTaskDto) {
     return `This action updates a #${id} examItem`;
   }
 
