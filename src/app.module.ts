@@ -38,6 +38,18 @@ import { FilesModule } from './common/files/files.module';
 // import { SurveySkillModule } from './modules/survey/survey_skill/survey_skill.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { CoursesModule } from './modules/courses/courses.module';
+import { SectionsModule } from './modules/sections/sections.module';
+import { EnrolmentsModule } from './modules/enrolments/enrolments.module';
+import { LessonsModule } from './modules/lessons/lessons.module';
+import { PaymentsModule } from './modules/payments/payments.module';
+import { PaymentMethodsModule } from './modules/payment_methods/payment_methods.module';
+import { AssignmentsModule } from './modules/assignments/assignments.module';
+import { ExamItemsModule } from './modules/tasks/tasks.module';
+import { ExamTypesModule } from './modules/exam_types/exam_types.module';
+import { FileModule } from './modules/file/file.module';
+import minioConfig from './common/config/minio.config';
+import { MinioModule } from 'nestjs-minio-client';
 
 @Module({
   imports: [
@@ -53,6 +65,7 @@ import { AuthModule } from './modules/auth/auth.module';
         // googleConfig,
         // twitterConfig,
         // appleConfig,
+        minioConfig,
       ],
       envFilePath: ['.env'],
     }),
@@ -104,6 +117,16 @@ import { AuthModule } from './modules/auth/auth.module';
     // SurveySkillModule,
     AuthModule,
     UsersModule,
+    CoursesModule,
+    LessonsModule,
+    EnrolmentsModule,
+    SectionsModule,
+    PaymentsModule,
+    PaymentMethodsModule,
+    AssignmentsModule,
+    ExamItemsModule,
+    ExamTypesModule,
+    FileModule,
   ],
 })
 export class AppModule {}

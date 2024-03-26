@@ -1,3 +1,5 @@
+import { bool } from "aws-sdk/clients/signer";
+
 export type AppConfig = {
   nodeEnv: string;
   name: string;
@@ -77,6 +79,15 @@ export type TwitterConfig = {
   consumerSecret?: string;
 };
 
+export type MinioConfig = {
+  endPoint?: string;
+  port?: number;
+  accessKey?: string;
+  secretKey?:string;
+  bucketName?: string;
+  useSSL?: boolean;
+}
+
 export type AllConfigType = {
   app: AppConfig;
   apple: AppleConfig;
@@ -87,4 +98,5 @@ export type AllConfigType = {
   google: GoogleConfig;
   mail: MailConfig;
   twitter: TwitterConfig;
+  minio: MinioConfig;
 };

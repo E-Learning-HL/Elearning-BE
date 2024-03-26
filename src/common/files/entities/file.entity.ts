@@ -11,8 +11,8 @@ import { EntityHelper } from 'src/utils/entity-helper';
 import { AppConfig } from 'src/common/config/config.type';
 import appConfig from 'src/common/config/app.config';
 
-@Entity({ name: 'file' })
-export class FileEntity extends EntityHelper {
+@Entity({ name: 'fileupload' })
+export class FileE extends EntityHelper {
   @ApiProperty({ example: 'cbcfa8b8-3a25-4adb-a9c6-e325f0d0f3ae' })
   @PrimaryGeneratedColumn('uuid')
   id: string;
