@@ -30,7 +30,7 @@ export class CoursesService {
 
   async findAll(
     page: number = 1,
-    limit: number = 10,
+    limit: number = 20,
     search: string = '',
     sort: 'ASC' | 'DESC' = 'DESC',
   ): Promise<{
