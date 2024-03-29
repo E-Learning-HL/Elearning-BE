@@ -1,0 +1,4 @@
+export enum TASK_TYPE {
+  LISTENING = 'LISTENING',
+  READING = "READING",
+}

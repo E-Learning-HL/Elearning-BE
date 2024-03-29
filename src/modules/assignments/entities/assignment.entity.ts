@@ -3,6 +3,7 @@ import { Course } from 'src/modules/courses/entities/course.entity';
 import { Task } from 'src/modules/tasks/entities/task.entity';
 import { Section } from 'src/modules/sections/entities/section.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { ASSIGNINMENT_TYPE } from '../constants/assignment-type.enum';
 
 @Entity('assignments')
 export class Assignment extends BaseEntity {
@@ -18,17 +19,23 @@ export class Assignment extends BaseEntity {
   order: number;
 
   @Column({
+    name: 'assignment_type',
+    nullable: true,
+  })
+  assignmentType: string;
+
+  @Column({
     nullable: true,
     default: true,
     name: 'is_active',
   })
   isActive: boolean;
 
-  @ManyToOne(() => Course, (course) => course.assignment)
+  @ManyToOne(() => Course, (course) => course.assignment, { nullable: true })
   @JoinColumn({ name: 'course_id' })
   course: Course;
 
-  @ManyToOne(() => Section, (section) => section.assignment)
+  @ManyToOne(() => Section, (section) => section.assignment, { nullable: true })
   @JoinColumn({ name: 'section_id' })
   section: Section;
 

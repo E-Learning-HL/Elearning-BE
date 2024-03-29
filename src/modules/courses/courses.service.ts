@@ -31,6 +31,7 @@ export class CoursesService {
     course.nameCourse = createCourseDto.name;
     course.price = createCourseDto.price;
     course.introduce = createCourseDto.introduce;
+    course.isActive = createCourseDto.status;
 
     const courseResult = await this.courseRepository.save(course);
 

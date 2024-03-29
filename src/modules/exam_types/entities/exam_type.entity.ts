@@ -7,6 +7,6 @@ export class ExamType extends BaseEntity {
   @Column({ nullable: true })
   name: string;
 
-  @OneToMany(() => Task, (task) => task.examType)
-  task: Task[];
+  // @OneToMany(() => Task, (task) => task.examType)
+  // task: Task[];
 }
