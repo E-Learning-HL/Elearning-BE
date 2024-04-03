@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as Minio from 'minio';
 import { Repository } from 'typeorm';
@@ -43,7 +43,11 @@ export class FileService {
     type: string,
     fileName: string,
   ): Promise<string> {
-    const dataFile = base64Data.replace(/^data:image\/\w+;base64,/, '');
+    const dataFile = base64Data.replace(
+      /^data:(image|audio|video)\/\w+;base64,/,
+      '',
+    );
+    Logger.debug('datafile', dataFile);
     const buffer = Buffer.from(dataFile, 'base64');
     const metadata = {
       'Content-Type': type,

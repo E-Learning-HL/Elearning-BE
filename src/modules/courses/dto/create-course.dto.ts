@@ -49,9 +49,9 @@ export class CreateCourseDto {
   @IsString()
   introduce: string;
 
-  // @ApiProperty()
-  // @IsBoolean()
-  // isActive: boolean;
+  @ApiProperty()
+  @IsBoolean()
+  status: boolean;
 
   @ApiProperty({
     type: [File],
