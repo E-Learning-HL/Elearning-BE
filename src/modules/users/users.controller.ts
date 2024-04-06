@@ -15,6 +15,7 @@ import {
   Query,
   DefaultValuePipe,
   HttpException,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -156,15 +157,12 @@ export class UsersController {
 
   @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
-  @Patch('change-password/:id')
-  async changePassword(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() changePassDto: ChangePassDTO,
-  ) {
+  @Patch('change-password')
+  async changePassword(@Req() req, @Body() changePassDto: ChangePassDTO) {
     const { oldPassword, newPassword } = changePassDto;
-
+    // console.log('------------- req >>>>>', req.user);
     const updatePassword = await this.usersService.changePasswordUser(
-      id,
+      req.user.id,
       oldPassword,
       newPassword,
     );

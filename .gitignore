@@ -43,3 +43,4 @@ lerna-debug.log*
 /ormconfig.json
 package-log.json
 Dockerfile_P
+redis/redis_data/dump.rdb

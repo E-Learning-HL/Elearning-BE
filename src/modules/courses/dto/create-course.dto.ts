@@ -49,9 +49,29 @@ export class CreateCourseDto {
   @IsString()
   introduce: string;
 
-  // @ApiProperty()
-  // @IsBoolean()
-  // isActive: boolean;
+  @ApiProperty()
+  @IsString()
+  listening: string;
+
+  @ApiProperty()
+  @IsString()
+  writing: string;
+
+  @ApiProperty()
+  @IsString()
+  speaking: string;
+
+  @ApiProperty()
+  @IsString()
+  reading: string;
+
+  @ApiProperty()
+  @IsNumber()
+  course_level: number;
+
+  @ApiProperty()
+  @IsBoolean()
+  status: boolean;
 
   @ApiProperty({
     type: [File],

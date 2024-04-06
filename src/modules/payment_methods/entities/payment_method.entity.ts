@@ -10,6 +10,9 @@ export class PaymentMethod extends BaseEntity {
     @Column({ type: 'text', nullable: true })
     description: string; 
 
+    @Column({name : 'is_active', nullable : true})
+    isActive : boolean
+
     @OneToMany(() => Payment, payment => payment.paymentMethod)
     payments: Payment[];
 }

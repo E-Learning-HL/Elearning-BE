@@ -80,6 +80,14 @@ export class CoursesController {
     return this.coursesService.findOne(id);
   }
 
+  @Get('course-level/:startPoint/:endPoint')
+  getCourseLevel(
+    @Param('startPoint') startPoint: number,
+    @Param('endPoint') endPoint: number,
+  ) {
+    return this.coursesService.findCourseLevel(startPoint, endPoint);
+  }
+
   // @ApiBearerAuth('access-token')
   // @UseGuards(JwtAuthGuard)
   @Put(':id')

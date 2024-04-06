@@ -50,6 +50,10 @@ import { ExamTypesModule } from './modules/exam_types/exam_types.module';
 import { FileModule } from './modules/file/file.module';
 import minioConfig from './common/config/minio.config';
 import { MinioModule } from 'nestjs-minio-client';
+import { QuestionsModule } from './modules/questions/questions.module';
+import { AnswersModule } from './modules/answers/answers.module';
+import { PaymentDetailsModule } from './modules/payment_details/payment_details.module';
+import { JobsModule } from './jobs/jobs.module';
 
 @Module({
   imports: [
@@ -127,6 +131,10 @@ import { MinioModule } from 'nestjs-minio-client';
     ExamItemsModule,
     ExamTypesModule,
     FileModule,
+    QuestionsModule,
+    AnswersModule,
+    PaymentDetailsModule,
+    JobsModule,
   ],
 })
 export class AppModule {}

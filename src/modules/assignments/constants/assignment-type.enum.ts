@@ -1,0 +1,4 @@
+export enum ASSIGNINMENT_TYPE {
+  TESTS = 'TESTS',
+  EXERCISES = 'EXERCISES',
+}

@@ -33,9 +33,6 @@ export class Lesson extends BaseEntity {
   })
   isActive: boolean;
 
-  // @Column({ nullable: true })
-  // section_id: number | null;
-
   @ManyToOne(() => Section, (section) => section.lesson, { nullable: true })
   @JoinColumn({ name: 'section_id' })
   section: Section;
