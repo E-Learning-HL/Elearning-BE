@@ -140,6 +140,7 @@ export class CoursesService {
         startPoint,
         endPoint,
       })
+      .andWhere('course.isActive = :isActive', { isActive: true })
       .select([
         'course.id',
         'course.nameCourse',
