@@ -5,6 +5,7 @@ import { Payment } from 'src/modules/payments/entities/payment.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Assignment } from 'src/modules/assignments/entities/assignment.entity';
 import { FileEntity } from 'src/modules/file/entities/file.entity';
+import { PaymentDetail } from 'src/modules/payment_details/entities/payment_detail.entity';
 
 @Entity('courses')
 export class Course extends BaseEntity {
@@ -29,6 +30,32 @@ export class Course extends BaseEntity {
 
   @Column({
     nullable: true,
+  })
+  listening: string;
+
+  @Column({
+    nullable: true,
+  })
+  speaking: string;
+
+  @Column({
+    nullable: true,
+  })
+  reading: string;
+
+  @Column({
+    nullable: true,
+  })
+  writing: string;
+
+  @Column({
+    nullable: true,
+    name: 'course_level',
+  })
+  courselevel: number;
+
+  @Column({
+    nullable: true,
     default: true,
     name: 'is_active',
   })
@@ -43,9 +70,9 @@ export class Course extends BaseEntity {
   @OneToMany(() => Enrolment, (enrolment) => enrolment.course)
   enrolment: Enrolment[];
 
-  @OneToMany(() => Payment, (payment) => payment.course)
-  payment: Payment[];
-
   @OneToMany(() => FileEntity, (file) => file.course)
   file: FileEntity[];
+
+  @OneToMany(() => PaymentDetail, (paymentDetail) => paymentDetail.course)
+  paymentDetail: PaymentDetail[];
 }

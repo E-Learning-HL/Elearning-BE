@@ -11,7 +11,7 @@ export class HomeController {
   @Get()
   appInfo() {
     return {
-      app_name: process.env['APP_NAME'] || 'API-ODIN',
+      app_name: process.env['APP_NAME'] || 'API-ELEARNING',
     };
   }
 }

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
-import { FindManyOptions, Like, Repository } from 'typeorm';
+import { Between, FindManyOptions, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Course } from './entities/course.entity';
 import { FileService } from '../file/file.service';
@@ -26,12 +26,16 @@ export class CoursesService {
   ) {}
 
   async create(createCourseDto: CreateCourseDto) {
-    console.log(createCourseDto);
     const course = new Course();
     course.nameCourse = createCourseDto.name;
     course.price = createCourseDto.price;
     course.introduce = createCourseDto.introduce;
     course.isActive = createCourseDto.status;
+    course.courselevel = createCourseDto.course_level;
+    course.listening = createCourseDto.listening;
+    course.speaking = createCourseDto.speaking;
+    course.reading = createCourseDto.reading;
+    course.writing = createCourseDto.writing;
 
     const courseResult = await this.courseRepository.save(course);
 
@@ -122,6 +126,44 @@ export class CoursesService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  async findCourseLevel(
+    startPoint: number,
+    endPoint: number,
+  ): Promise<Course[]> {
+    const courses = await this.courseRepository
+      .createQueryBuilder('course')
+      .leftJoinAndSelect('course.section', 'section')
+      .leftJoin('section.lesson', 'lesson')
+      .where('course.courselevel BETWEEN :startPoint AND :endPoint', {
+        startPoint,
+        endPoint,
+      })
+      .select([
+        'course.id',
+        'course.nameCourse',
+        'course.price',
+        'course.introduce',
+        'course.listening',
+        'course.speaking',
+        'course.reading',
+        'course.writing',
+        'course.courselevel',
+        'course.isActive',
+        'COUNT(lesson.id) As countLesson', // Đếm số lượng bài học trong mỗi khóa học
+      ])
+      .groupBy('course.id')
+      .getRawMany();
+
+    if (!courses) {
+      throw new NotFoundException({
+        message: 'Courses not found',
+        status: HttpStatus.NOT_FOUND,
+      });
+    }
+
+    return courses;
   }
 
   async update(id: number, updateCourseDto: UpdateCourseDto): Promise<Course> {

@@ -2,7 +2,9 @@ import { BaseEntity } from "src/database/base/base.entity";
 import { Course } from "src/modules/courses/entities/course.entity";
 import { PaymentMethod } from "src/modules/payment_methods/entities/payment_method.entity";
 import { User } from "src/modules/users/entities/user.entity";
-import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
+import { PAYMENT_STATUS } from "../constants/payment-status.enum";
+import { PaymentDetail } from "src/modules/payment_details/entities/payment_detail.entity";
 
 @Entity('payments')
 export class Payment extends BaseEntity {
@@ -11,12 +13,6 @@ export class Payment extends BaseEntity {
         name : 'user_id'
     })
     user: User;
-  
-    @ManyToOne(() => Course, course => course.payment)
-    @JoinColumn({
-        name : 'course_id'
-    })
-    course: Course;
   
     @Column({
         nullable : true,
@@ -27,15 +23,18 @@ export class Payment extends BaseEntity {
     amount: number;
 
     @Column({ 
-        type: 'boolean', 
-        default: false,
-        name : 'is_paid'
+        type: 'enum', 
+        name : 'status',
+        enum : PAYMENT_STATUS,
     })
-    isPaid: boolean;
+    status: string;
 
     @ManyToOne(() => PaymentMethod, paymentMethod => paymentMethod.payments)
     @JoinColumn({
         name : 'payment_method_id'
     })
     paymentMethod: PaymentMethod;
+
+    @OneToMany(() => PaymentDetail, (paymentDetail) => paymentDetail.course)
+    paymentDetail : PaymentDetail[]
 }

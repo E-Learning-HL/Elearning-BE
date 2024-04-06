@@ -47,7 +47,6 @@ export class FileService {
       /^data:(image|audio|video)\/\w+;base64,/,
       '',
     );
-    Logger.debug('datafile', dataFile);
     const buffer = Buffer.from(dataFile, 'base64');
     const metadata = {
       'Content-Type': type,

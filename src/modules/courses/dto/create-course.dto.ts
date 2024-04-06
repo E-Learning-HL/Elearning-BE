@@ -50,6 +50,26 @@ export class CreateCourseDto {
   introduce: string;
 
   @ApiProperty()
+  @IsString()
+  listening: string;
+
+  @ApiProperty()
+  @IsString()
+  writing: string;
+
+  @ApiProperty()
+  @IsString()
+  speaking: string;
+
+  @ApiProperty()
+  @IsString()
+  reading: string;
+
+  @ApiProperty()
+  @IsNumber()
+  course_level: number;
+
+  @ApiProperty()
   @IsBoolean()
   status: boolean;
 
