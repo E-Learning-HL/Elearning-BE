@@ -50,9 +50,13 @@ export class Course extends BaseEntity {
 
   @Column({
     nullable: true,
-    name: 'course_level',
   })
-  courselevel: number;
+  start: number;
+
+  @Column({
+    nullable: true,
+  })
+  target: number;
 
   @Column({
     nullable: true,

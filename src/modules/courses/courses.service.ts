@@ -31,7 +31,8 @@ export class CoursesService {
     course.price = createCourseDto.price;
     course.introduce = createCourseDto.introduce;
     course.isActive = createCourseDto.status;
-    course.courselevel = createCourseDto.course_level;
+    course.start = createCourseDto.course_level[0];
+    course.target = createCourseDto.course_level[1];
     course.listening = createCourseDto.listening;
     course.speaking = createCourseDto.speaking;
     course.reading = createCourseDto.reading;
@@ -136,10 +137,8 @@ export class CoursesService {
       .createQueryBuilder('course')
       .leftJoinAndSelect('course.section', 'section')
       .leftJoin('section.lesson', 'lesson')
-      .where('course.courselevel BETWEEN :startPoint AND :endPoint', {
-        startPoint,
-        endPoint,
-      })
+      .where('course.start >= :startPoint', { startPoint })
+      .andWhere('course.target <= :endPoint', { endPoint })
       .andWhere('course.isActive = :isActive', { isActive: true })
       .select([
         'course.id',
@@ -150,7 +149,8 @@ export class CoursesService {
         'course.speaking',
         'course.reading',
         'course.writing',
-        'course.courselevel',
+        'course.start',
+        'course.target',
         'course.isActive',
         'COUNT(lesson.id) As countLesson', // Đếm số lượng bài học trong mỗi khóa học
       ])
@@ -205,7 +205,7 @@ export class CoursesService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} course`;
+  async remove(id: number) {
+    return await this.courseRepository.delete(id);
   }
 }

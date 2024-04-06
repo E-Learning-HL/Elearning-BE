@@ -75,17 +75,19 @@ export class CoursesController {
 
   // @ApiBearerAuth('access-token')
   // @UseGuards(JwtAuthGuard)
+  @Get('course-level')
+  getCourseLevel(
+    @Query('startPoint') startPoint: number,
+    @Query('endPoint') endPoint: number,
+  ) {
+    return this.coursesService.findCourseLevel(startPoint, endPoint);
+  }
+
+  // @ApiBearerAuth('access-token')
+  // @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.coursesService.findOne(id);
-  }
-
-  @Get('course-level/:startPoint/:endPoint')
-  getCourseLevel(
-    @Param('startPoint') startPoint: number,
-    @Param('endPoint') endPoint: number,
-  ) {
-    return this.coursesService.findCourseLevel(startPoint, endPoint);
   }
 
   // @ApiBearerAuth('access-token')
@@ -102,6 +104,6 @@ export class CoursesController {
   // @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: number) {
-    return this.coursesService.remove(+id);
+    return this.coursesService.remove(id);
   }
 }

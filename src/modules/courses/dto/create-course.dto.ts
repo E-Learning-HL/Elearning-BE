@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsNumber, IsString } from 'class-validator';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsBoolean,
+  IsNumber,
+  IsString,
+} from 'class-validator';
 
 class File {
   @ApiProperty()
@@ -65,9 +71,10 @@ export class CreateCourseDto {
   @IsString()
   reading: string;
 
-  @ApiProperty()
-  @IsNumber()
-  course_level: number;
+  @ApiProperty({ example: [100, 300] })
+  @IsArray()
+  @ArrayMinSize(2)
+  course_level: number[];
 
   @ApiProperty()
   @IsBoolean()
