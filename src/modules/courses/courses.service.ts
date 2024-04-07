@@ -223,7 +223,7 @@ export class CoursesService {
   //   return await this.courseRepository.delete(id);
   // }
 
-  async update(id: number, updateCourseDto: UpdateCourseDto): Promise<Course> {
+  async update(id: number, updateCourseDto: UpdateCourseDto): Promise<any> {
     const oldCourse = await this.courseRepository.findOne({
       where: { id: id },
       relations: ['section', 'section.lesson', 'section.lesson.file', 'file'],
@@ -318,6 +318,7 @@ export class CoursesService {
           }
           await this.lessonRepository.delete(lesson.id);
         }
+
         await this.sectionRepository.delete(sectionId);
       }
 
@@ -378,6 +379,12 @@ export class CoursesService {
           );
           if (lessonToDelete) {
             for (const lessonId of lessonToDelete) {
+              const filesToDelete = await this.fileRepository.find({
+                where: { lesson: { id: lessonId } },
+              });
+              for (const file of filesToDelete) {
+                await this.fileService.deleteFile(file.id);
+              }
               await this.lessonRepository.delete(lessonId);
             }
           }
@@ -398,7 +405,7 @@ export class CoursesService {
                 const newLesson = new Lesson();
                 newLesson.nameLesson = itemLesson.name;
                 newLesson.section = oldSection;
-                const lessonResult = await this.sectionRepository.save(
+                const lessonResult = await this.lessonRepository.save(
                   newLesson,
                 );
 
@@ -426,7 +433,7 @@ export class CoursesService {
                 const lessonResult = await this.lessonRepository.save(lesson);
 
                 if (!itemLesson?.video[0]?.fileId) {
-                  const oldFile = await await this.fileRepository.find({
+                  const oldFile = await this.fileRepository.find({
                     where: { lesson: { id: lesson.id } },
                   });
                   for (const file of oldFile) {
@@ -451,6 +458,11 @@ export class CoursesService {
         }
       });
     }
-    return await this.courseRepository.save(oldCourse);
+    const course = await this.courseRepository.save(oldCourse);
+    return {
+      course,
+      statusCode: HttpStatus.OK,
+      message: 'Update course successfully',
+    };
   }
 }
