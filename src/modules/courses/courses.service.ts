@@ -155,6 +155,7 @@ export class CoursesService {
         'COUNT(lesson.id) As countLesson', // Đếm số lượng bài học trong mỗi khóa học
       ])
       .groupBy('course.id')
+      .orderBy('course.start', 'ASC')
       .getRawMany();
 
     if (!courses) {
@@ -168,41 +169,48 @@ export class CoursesService {
   }
 
   async update(id: number, updateCourseDto: UpdateCourseDto): Promise<Course> {
-    const course = await this.courseRepository.findOne({
+    const courseToUpdate = await this.courseRepository.findOne({
       where: { id: id },
     });
 
-    if (!course) {
-      throw new NotFoundException({
-        message: 'Course not found',
-        status: HttpStatus.NOT_FOUND,
-      });
+    if (!courseToUpdate) {
+      throw new NotFoundException(`Course with ID ${id} not found`);
     }
 
-    // if (updateCourseDto.nameCourse !== undefined) {
-    //   course.nameCourse = updateCourseDto.nameCourse;
-    // }
-    // if (updateCourseDto.price !== undefined) {
-    //   course.price = updateCourseDto.price;
-    // }
-    // if (updateCourseDto.introduce !== undefined) {
-    //   course.introduce = updateCourseDto.introduce;
-    // }
-    // // if (updateCourseDto.images !== undefined) {
-    // //   // course.imageUrl = updateCourseDto.images;
-    // // }
-    // if (updateCourseDto.isActive !== undefined) {
-    //   course.isActive = updateCourseDto.isActive;
-    // }
-
-    try {
-      return await this.courseRepository.save(course);
-    } catch (error) {
-      throw new HttpException(
-        'Failed to save course',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    // Update course properties if they exist in the DTO
+    if (updateCourseDto.name) {
+      courseToUpdate.nameCourse = updateCourseDto.name;
     }
+    if (updateCourseDto.price) {
+      courseToUpdate.price = updateCourseDto.price;
+    }
+    if (updateCourseDto.introduce) {
+      courseToUpdate.introduce = updateCourseDto.introduce;
+    }
+    if (updateCourseDto.listening) {
+      courseToUpdate.listening = updateCourseDto.listening;
+    }
+    if (updateCourseDto.speaking) {
+      courseToUpdate.speaking = updateCourseDto.speaking;
+    }
+    if (updateCourseDto.reading) {
+      courseToUpdate.reading = updateCourseDto.reading;
+    }
+    if (updateCourseDto.writing) {
+      courseToUpdate.writing = updateCourseDto.writing;
+    }
+    if (updateCourseDto.course_level) {
+      courseToUpdate.start = updateCourseDto.course_level[0];
+      courseToUpdate.target = updateCourseDto.course_level[1];
+    }
+    if (updateCourseDto.status !== undefined) {
+      courseToUpdate.isActive = updateCourseDto.status;
+    }
+
+    // Save the updated course to the database
+    const updatedCourse = await this.courseRepository.save(courseToUpdate);
+
+    return updatedCourse;
   }
 
   async remove(id: number) {
