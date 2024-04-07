@@ -102,8 +102,8 @@ export class CoursesController {
 
   // @ApiBearerAuth('access-token')
   // @UseGuards(JwtAuthGuard)
-  @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.coursesService.remove(id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: number) {
+  //   return this.coursesService.remove(id);
+  // }
 }
