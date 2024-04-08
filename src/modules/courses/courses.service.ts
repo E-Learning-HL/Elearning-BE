@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
@@ -269,19 +270,15 @@ export class CoursesService {
       oldCourse.isActive = updateCourseDto.status;
     }
 
+    const course = await this.courseRepository.save(oldCourse);
     // Cập nhật cover của course
     const updatedCover = updateCourseDto.cover?.[0];
-    if (updatedCover) {
-      const existingFile = oldCourse.file.find(
-        (file) => file.id === updatedCover.fileId,
-      );
-      console.log('existingFile', existingFile);
-
+    if (updatedCover && !updatedCover?.fileId) {
       const oldFile = await this.fileRepository.findOne({
         where: { course: { id: oldCourse.id } },
       });
       console.log('oldFile', oldFile);
-      if (!existingFile && oldFile) {
+      if (oldFile) {
         await this.fileService.deleteFile(oldFile?.id);
 
         const fileUrl = await this.fileService.uploadBase64File(
@@ -289,46 +286,60 @@ export class CoursesService {
           updatedCover.type,
           updatedCover.name,
         );
-
-        await this.fileService.saveFile(fileUrl, oldCourse.id, null, null);
+        console.log('fileUrl', fileUrl);
+        console.log('oldCourseID', id);
+        await this.fileService.saveFile(fileUrl, id, null, null);
+      } else {
+        const fileUrl = await this.fileService.uploadBase64File(
+          updatedCover.response,
+          updatedCover.type,
+          updatedCover.name,
+        );
+        console.log('fileUrl', fileUrl);
+        console.log('oldCourseID', id);
+        await this.fileService.saveFile(fileUrl, id, null, null);
       }
     }
 
-    // Cập nhật thông tin về các phần và bài học
+    // check oldSection với newSection
     if (updateCourseDto.course_section) {
-      const oldSectionId = oldCourse?.section?.map((item) => item.id);
+      const oldSectionId = oldCourse?.section?.map(
+        (itemOldSection) => itemOldSection.id,
+      );
 
       const newSectionId = updateCourseDto?.course_section?.map(
-        (item) => item.sectionId,
+        (itemNewSection) => itemNewSection.sectionId,
       );
 
       const sectionToDelete = oldSectionId.filter(
         (item) => !newSectionId.includes(item),
       );
+
+      console.log('sectionToDelete', sectionToDelete);
       for (const sectionId of sectionToDelete) {
         const lessonsToDelete = await this.lessonRepository.find({
           where: { section: { id: sectionId } },
         });
+
         for (const lesson of lessonsToDelete) {
           const filesToDelete = await this.fileRepository.find({
             where: { lesson: { id: lesson.id } },
           });
+
           for (const file of filesToDelete) {
             await this.fileService.deleteFile(file.id);
           }
+
           await this.lessonRepository.delete(lesson.id);
         }
 
         await this.sectionRepository.delete(sectionId);
       }
 
-      // const sectionToAdd = newSectionId.find(item => !oldSectionId.includes(item))
-      // const sectionToCheck = oldSectionId.filter((item) =>
-      //   newSectionId.includes(item),
-      // );
-
       updateCourseDto.course_section.map(async (item) => {
+        // nếu không có sectionId tức là có section mới
         if (!item.sectionId) {
+          Logger.debug('co section moi');
           const newSection = new Section();
           newSection.nameSection = item.section_name;
           newSection.course = oldCourse;
@@ -342,22 +353,27 @@ export class CoursesService {
               lesson.isActive = true;
               lesson.order = 1;
 
-              const lessonReusult = await this.lessonRepository.save(lesson);
+              const lessonResult = await this.lessonRepository.save(lesson);
 
               const fileUrl = await this.fileService.uploadBase64File(
                 lessonItem.video[0].response,
                 lessonItem.video[0].type,
                 lessonItem.video[0].name,
               );
+
+              Logger.debug('fileUrl cuar lesson', fileUrl);
+              Logger.debug('lessonReusult.id lesson', lessonResult.id);
               await this.fileService.saveFile(
                 fileUrl,
                 null,
-                lessonReusult.id,
+                lessonResult.id,
                 null,
               );
             }),
           );
         } else {
+          Logger.debug('khong co section moi');
+          // nếu có sectionId thì check cập nhật section
           const section = await this.sectionRepository.findOne({
             where: { id: item.sectionId },
           });
@@ -366,17 +382,20 @@ export class CoursesService {
             await this.sectionRepository.save(section);
           }
 
-          //check lesson here
+          //check lesson  old và new xem có thay đổi gì không
           const oldLesson = oldCourse.section
             .find((itemSection) => itemSection.id == item.sectionId)
             ?.lesson?.map((itemLesson) => itemLesson.id);
+
           const newLesson = item.lessons.map(
             (itemLesson) => itemLesson.lessonId,
           );
 
+          // lấy ra những lesson cần xoá mà oldLesson không có trong newLesson
           const lessonToDelete = oldLesson?.filter(
             (item) => !newLesson.includes(item),
           );
+
           if (lessonToDelete) {
             for (const lessonId of lessonToDelete) {
               const filesToDelete = await this.fileRepository.find({
@@ -388,77 +407,74 @@ export class CoursesService {
               await this.lessonRepository.delete(lessonId);
             }
           }
-          // const sectionToAdd = newSectionId.find(item => !oldSectionId.includes(item))
-          // const lessonToCheck = oldLesson?.filter((item) =>
-          //   newLesson.includes(item),
-          // );
 
           const oldSection = await this.sectionRepository.findOne({
             where: { id: item.sectionId },
           });
-          if (!oldSection) {
-            throw new Error(`Section with id ${item.sectionId} not found`);
-          }
-          await Promise.all(
-            item.lessons.map(async (itemLesson) => {
-              if (!itemLesson.lessonId) {
-                const newLesson = new Lesson();
-                newLesson.nameLesson = itemLesson.name;
-                newLesson.section = oldSection;
-                const lessonResult = await this.lessonRepository.save(
-                  newLesson,
-                );
-
-                const fileUrl = await this.fileService.uploadBase64File(
-                  itemLesson.video[0].response,
-                  itemLesson.video[0].type,
-                  itemLesson.video[0].name,
-                );
-                await this.fileService.saveFile(
-                  fileUrl,
-                  null,
-                  lessonResult.id,
-                  null,
-                );
-              } else {
-                const lesson = await this.lessonRepository.findOne({
-                  where: { id: itemLesson.lessonId },
-                });
-                if (!lesson) {
-                  throw new Error(
-                    `Section with id ${item.sectionId} not found`,
+          if (oldSection) {
+            await Promise.all(
+              item.lessons.map(async (itemLesson) => {
+                if (!itemLesson.lessonId) {
+                  const newLesson = new Lesson();
+                  newLesson.nameLesson = itemLesson.name;
+                  newLesson.section = oldSection;
+                  const lessonResult = await this.lessonRepository.save(
+                    newLesson,
                   );
-                }
-                lesson.nameLesson = itemLesson.name;
-                const lessonResult = await this.lessonRepository.save(lesson);
-
-                if (!itemLesson?.video[0]?.fileId) {
-                  const oldFile = await this.fileRepository.find({
-                    where: { lesson: { id: lesson.id } },
-                  });
-                  for (const file of oldFile) {
-                    await this.fileService.deleteFile(file.id);
-                  }
 
                   const fileUrl = await this.fileService.uploadBase64File(
                     itemLesson.video[0].response,
                     itemLesson.video[0].type,
                     itemLesson.video[0].name,
                   );
+                  Logger.debug('fileUrl cuar lesson', fileUrl);
+                  Logger.debug('lessonReusult.id lesson', lessonResult);
+                  Logger.debug('lessonReusult.id lesson', itemLesson.lessonId);
                   await this.fileService.saveFile(
                     fileUrl,
                     null,
-                    lessonResult.id,
+                    itemLesson.lessonId,
                     null,
                   );
+                } else {
+                  const lesson = await this.lessonRepository.findOne({
+                    where: { id: itemLesson.lessonId },
+                  });
+                  if (lesson) {
+                    lesson.nameLesson = itemLesson.name;
+                    const lessonResult = await this.lessonRepository.save(
+                      lesson,
+                    );
+
+                    if (!itemLesson?.video[0]?.fileId) {
+                      const oldFile = await this.fileRepository.find({
+                        where: { lesson: { id: lesson.id } },
+                      });
+                      for (const file of oldFile) {
+                        await this.fileService.deleteFile(file.id);
+                      }
+
+                      const fileUrl = await this.fileService.uploadBase64File(
+                        itemLesson.video[0].response,
+                        itemLesson.video[0].type,
+                        itemLesson.video[0].name,
+                      );
+                      await this.fileService.saveFile(
+                        fileUrl,
+                        null,
+                        lessonResult.id,
+                        null,
+                      );
+                    }
+                  }
                 }
-              }
-            }),
-          );
+              }),
+            );
+          }
         }
       });
     }
-    const course = await this.courseRepository.save(oldCourse);
+
     return {
       course,
       statusCode: HttpStatus.OK,
