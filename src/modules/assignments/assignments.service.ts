@@ -40,11 +40,11 @@ export class AssignmentsService {
     const assignment = new Assignment();
     assignment.nameAssignment = createAssignmentDto.name;
     assignment.isActive = createAssignmentDto.status;
-    assignment.assignmentType = createAssignmentDto.exam_type;
+    assignment.assignmentType = createAssignmentDto.examType;
 
-    if (createAssignmentDto.course_id !== undefined) {
+    if (createAssignmentDto.courseId !== undefined) {
       const course = new Course();
-      course.id = createAssignmentDto.course_id;
+      course.id = createAssignmentDto.courseId;
       assignment.course = course;
       const countOrder = await this.assignmentRepository.findAndCount({
         where: { course: { id: course.id } },
@@ -52,9 +52,9 @@ export class AssignmentsService {
       assignment.order = countOrder[1] + 1 ?? 0;
     }
 
-    if (createAssignmentDto.section_id !== undefined) {
+    if (createAssignmentDto.sectionId !== undefined) {
       const section = new Section();
-      section.id = createAssignmentDto.section_id;
+      section.id = createAssignmentDto.sectionId;
       assignment.section = section;
       const countOrder = await this.assignmentRepository.findAndCount({
         where: { section: { id: section.id } },
@@ -71,11 +71,11 @@ export class AssignmentsService {
       const task = new Task();
       task.content = taskDto.content;
       task.assignment = assignmentResult;
-      task.taskType = taskDto.task_type;
+      task.taskType = taskDto.taskType;
 
       const taskResult = await this.taskRepository.save(task);
 
-      if (taskDto.task_type == TASK_TYPE.LISTENING) {
+      if (taskDto.taskType == TASK_TYPE.LISTENING) {
         const audioUrl = await this.fileService.uploadBase64File(
           taskDto.audio[0].response,
           taskDto.audio[0].type,
@@ -90,7 +90,7 @@ export class AssignmentsService {
         const question = new Question();
         question.title = questionDto.title;
         question.task = taskResult;
-        question.questionType = questionDto.question_type;
+        question.questionType = questionDto.questionType;
 
         const questionResult = await this.questionRepository.save(question);
 
@@ -99,7 +99,7 @@ export class AssignmentsService {
           const answer = new Answer();
           answer.content = answerDto.title;
           answer.question = questionResult;
-          answer.isCorrect = answerDto.is_correct;
+          answer.isCorrect = answerDto.isCorrect;
 
           await this.answerRepository.save(answer);
         }
@@ -222,7 +222,7 @@ export class AssignmentsService {
           where: { task: { id: taskId } },
         });
 
-        if (updateTask[0].task_type == TASK_TYPE.LISTENING) {
+        if (updateTask[0].taskType == TASK_TYPE.LISTENING) {
           const fileToDelete = await this.fileRepository.find({
             where: { task: { id: taskId } },
           });
@@ -250,7 +250,7 @@ export class AssignmentsService {
         if (!itemTask.taskId) {
           // co task moi
           const task = new Task();
-          task.taskType = itemTask.task_type;
+          task.taskType = itemTask.taskType;
           if (itemTask.content !== undefined) {
             task.content = itemTask.content;
           }
@@ -275,7 +275,7 @@ export class AssignmentsService {
             const question = new Question();
             question.title = questionDto.title;
             question.task = taskResult;
-            question.questionType = questionDto.question_type;
+            question.questionType = questionDto.questionType;
 
             const questionResult = await this.questionRepository.save(question);
 
@@ -283,7 +283,7 @@ export class AssignmentsService {
               const answer = new Answer();
               answer.content = answerDto.title;
               answer.question = questionResult;
-              answer.isCorrect = answerDto.is_correct;
+              answer.isCorrect = answerDto.isCorrect;
 
               await this.answerRepository.save(answer);
             }
@@ -365,14 +365,14 @@ export class AssignmentsService {
                   });
                   if (answer) {
                     answer.content = answerDto.title;
-                    answer.isCorrect = answerDto.is_correct;
+                    answer.isCorrect = answerDto.isCorrect;
                     await this.questionRepository.save(answer);
                   }
                 } else {
                   // có answer mới
                   const answer = new Answer();
                   answer.content = answerDto.title;
-                  answer.isCorrect = answerDto.is_correct;
+                  answer.isCorrect = answerDto.isCorrect;
                 }
               }
             } else {
@@ -380,7 +380,7 @@ export class AssignmentsService {
               const question = new Question();
               question.title = questionDto.title;
               question.task = taskResult;
-              question.questionType = questionDto.question_type;
+              question.questionType = questionDto.questionType;
 
               const questionResult = await this.questionRepository.save(
                 question,
@@ -390,7 +390,7 @@ export class AssignmentsService {
                 const answer = new Answer();
                 answer.content = answerDto.title;
                 answer.question = questionResult;
-                answer.isCorrect = answerDto.is_correct;
+                answer.isCorrect = answerDto.isCorrect;
 
                 await this.answerRepository.save(answer);
               }

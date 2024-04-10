@@ -46,7 +46,7 @@ class Answer {
   @ApiProperty()
   @IsOptional()
   @IsString()
-  is_correct: boolean;
+  isCorrect: boolean;
 }
 
 class Question {
@@ -62,7 +62,7 @@ class Question {
 
   @ApiProperty()
   @IsOptional()
-  question_type: QUESTION_TYPE;
+  questionType: QUESTION_TYPE;
 
   @ApiProperty({
     type: [Answer],
@@ -90,7 +90,7 @@ class Task {
 
   @ApiProperty()
   @IsOptional()
-  task_type: TASK_TYPE;
+  taskType: TASK_TYPE;
 
   @ApiProperty({
     type: [Question],
@@ -114,17 +114,17 @@ export class UpdateAssignmentDto {
     nullable: true,
   })
   @IsOptional()
-  course_id: number;
+  courseId: number;
 
   @ApiProperty({
     nullable: true,
   })
   @IsOptional()
-  section_id: number;
+  sectionId: number;
 
   @ApiProperty()
   @IsOptional()
-  exam_type: ASSIGNINMENT_TYPE;
+  examType: ASSIGNINMENT_TYPE;
 
   @ApiProperty({
     type: [Task],
