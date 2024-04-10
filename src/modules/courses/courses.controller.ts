@@ -86,8 +86,16 @@ export class CoursesController {
   // @ApiBearerAuth('access-token')
   // @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.coursesService.findOne(id);
+  async findOne(@Param('id') id: number) {
+    return await this.coursesService.findOne(id);
+  }
+
+  // @ApiBearerAuth('access-token')
+  // @UseGuards(JwtAuthGuard)
+  @Get('get-course-public/:id')
+  async findCoursePublic(@Param('id') id: number) {
+    const isActive = true;
+    return await this.coursesService.findCoursePublic(id, isActive);
   }
 
   // @ApiBearerAuth('access-token')
