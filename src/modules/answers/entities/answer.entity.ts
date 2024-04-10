@@ -8,7 +8,10 @@ export class Answer extends BaseEntity {
   @Column()
   content: string;
 
-  @Column()
+  @Column({
+    // nullable: true,
+    name: 'is_correct',
+  })
   isCorrect: boolean;
 
   @ManyToOne(() => Question, (question) => question.answer)

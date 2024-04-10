@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
@@ -19,6 +20,7 @@ import { Section } from '../sections/entities/section.entity';
 import { QUESTION_TYPE } from '../questions/constants/question-type.enum';
 import { logger } from 'handlebars';
 import { FileEntity } from '../file/entities/file.entity';
+import { Lesson } from '../lessons/entities/lesson.entity';
 
 @Injectable()
 export class AssignmentsService {
@@ -31,6 +33,8 @@ export class AssignmentsService {
     private questionRepository: Repository<Question>,
     @InjectRepository(Answer)
     private answerRepository: Repository<Answer>,
+    @InjectRepository(Lesson)
+    private lessonRepository: Repository<Lesson>,
     @InjectRepository(FileEntity)
     private fileRepository: Repository<FileEntity>,
     private readonly fileService: FileService,
@@ -56,10 +60,16 @@ export class AssignmentsService {
       const section = new Section();
       section.id = createAssignmentDto.sectionId;
       assignment.section = section;
-      const countOrder = await this.assignmentRepository.findAndCount({
+      const countAssignment = await this.assignmentRepository.findAndCount({
         where: { section: { id: section.id } },
       });
-      assignment.order = countOrder[1] + 1 ?? 0;
+      Logger.debug('countAssignment[1]', countAssignment[1]);
+      const countLesson = await this.lessonRepository.findAndCount({
+        where: { section: { id: section.id } },
+      });
+      Logger.debug('countLesson[1]', countLesson[1]);
+      assignment.order = countAssignment[1] + countLesson[1] + 1 ?? 0;
+      Logger.debug('assignment.order', assignment.order);
     }
 
     const assignmentResult = await this.assignmentRepository.save(assignment);
@@ -201,7 +211,9 @@ export class AssignmentsService {
     oldAssignment.nameAssignment = updateAssignmentDto.name;
     oldAssignment.isActive = updateAssignmentDto.status;
 
-    await this.assignmentRepository.save(oldAssignment);
+    const assignmentResult = await this.assignmentRepository.save(
+      oldAssignment,
+    );
 
     const updateTask = updateAssignmentDto.task;
     // check old task voi new task
@@ -249,8 +261,10 @@ export class AssignmentsService {
       updateTask.map(async (itemTask) => {
         if (!itemTask.taskId) {
           // co task moi
+          console.log('co task moi');
           const task = new Task();
           task.taskType = itemTask.taskType;
+          task.assignment = assignmentResult;
           if (itemTask.content !== undefined) {
             task.content = itemTask.content;
           }
@@ -290,6 +304,7 @@ export class AssignmentsService {
           }
         } else {
           // khong co task moi
+          console.log('khong co task moi');
           if (itemTask.audio !== undefined) {
             if (!itemTask.audio[0]?.fileId) {
               // co file audio moi
@@ -352,12 +367,33 @@ export class AssignmentsService {
               const question = await this.questionRepository.findOne({
                 where: { id: questionDto.questionId },
               });
-              if (question) {
-                question.title = questionDto.title;
-                await this.questionRepository.save(question);
+              if (!question) {
+                throw new NotFoundException('Question not found');
+              }
+
+              question.title = questionDto.title;
+              question.questionType = questionDto.questionType;
+              const questionResult = await this.questionRepository.save(
+                question,
+              );
+
+              const oldAnswer = itemTask.question
+                .find((item) => item.questionId == questionDto.questionId)
+                ?.answer?.map((itemAnswer) => itemAnswer.answerId);
+              // Lấy các ID của answer mới
+              const newAnswer = questionDto.answer.map((item) => item.answerId);
+
+              const answerToDelete = oldAnswer?.filter(
+                (item) => !newAnswer.includes(item),
+              );
+              if (answerToDelete && answerToDelete.length > 0) {
+                for (const answer of answerToDelete) {
+                  await this.answerRepository.delete(answer);
+                }
               }
 
               for (const answerDto of questionDto.answer) {
+                Logger.debug('answerDto', answerDto);
                 if (answerDto.answerId) {
                   // không có answer mới
                   const answer = await this.answerRepository.findOne({
@@ -366,13 +402,15 @@ export class AssignmentsService {
                   if (answer) {
                     answer.content = answerDto.title;
                     answer.isCorrect = answerDto.isCorrect;
-                    await this.questionRepository.save(answer);
+                    await this.answerRepository.save(answer);
                   }
                 } else {
                   // có answer mới
                   const answer = new Answer();
                   answer.content = answerDto.title;
                   answer.isCorrect = answerDto.isCorrect;
+                  answer.question = questionResult;
+                  await this.answerRepository.save(answer);
                 }
               }
             } else {
@@ -399,6 +437,10 @@ export class AssignmentsService {
         }
       });
     }
+    return {
+      status: HttpStatus.OK,
+      message: 'Update assignment successfully',
+    };
   }
 
   async remove(id: number): Promise<string> {
@@ -409,9 +451,43 @@ export class AssignmentsService {
     if (!assignment) {
       throw new NotFoundException('Assignment not found');
     }
+    // Xoá các tệp tin liên quan đến các nhiệm vụ của bài tập trước
     if (assignment.task && assignment.task.length > 0) {
       await Promise.all(
         assignment.task.map(async (task) => {
+          //xoá question, answer
+          const questions = await this.questionRepository.find({
+            where: { task: { id: task.id } },
+          });
+          if (questions && questions.length > 0) {
+            await Promise.all(
+              questions.map(async (question) => {
+                const answers = await this.answerRepository.find({
+                  where: { question: { id: question.id } },
+                });
+                if (answers && answers.length > 0) {
+                  await Promise.all(
+                    answers.map(async (answer) => {
+                      await this.answerRepository.remove(answer);
+                    }),
+                  );
+                }
+                await this.questionRepository.remove(question);
+              }),
+            );
+          }
+
+          // xoá các file
+          const files = await this.fileRepository.find({
+            where: { task: { id: task.id } },
+          });
+          if (files && files.length > 0) {
+            await Promise.all(
+              files.map(async (file) => {
+                await this.fileRepository.remove(file);
+              }),
+            );
+          }
           await this.taskRepository.remove(task);
         }),
       );

@@ -8,37 +8,16 @@ import { Score } from 'src/modules/scores/entities/score.entity';
 
 @Entity('tasks')
 export class Task extends BaseEntity {
-  // @Column({
-  //   nullable: true,
-  // })
-  // title: string;
-
   @Column({
     nullable: true,
   })
   content: string;
-
-  // @Column({
-  //   nullable: true,
-  // })
-  // audio: string;
-
-  // @Column({
-  //   nullable: true,
-  //   default: true,
-  //   name: 'is_active',
-  // })
-  // isActive: boolean;
 
   @ManyToOne(() => Assignment, (assignment) => assignment.task, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'assignment_id' })
   assignment: Assignment;
-
-  // @ManyToOne(() => ExamType, (examType) => examType.task)
-  // @JoinColumn({ name: 'exam_type_id' })
-  // examType: ExamType;
 
   @Column({
     name: 'task_type',

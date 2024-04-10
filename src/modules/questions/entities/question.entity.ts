@@ -8,13 +8,16 @@ import { UserAnswer } from 'src/modules/user_answers/entities/user_answer.entity
 
 @Entity('questions')
 export class Question extends BaseEntity {
-  @Column()
+  @Column({
+    // nullable: true,
+  })
   title: string;
 
   @Column({
     name: 'question_type',
     type: 'enum',
     enum: QUESTION_TYPE,
+    // nullable: true,
   })
   questionType: QUESTION_TYPE;
 

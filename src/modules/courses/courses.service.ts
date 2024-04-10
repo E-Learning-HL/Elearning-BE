@@ -146,7 +146,7 @@ export class CoursesService {
     };
   }
 
-  async findOne(id: number): Promise<Course | null> {
+  async findOne(id: number): Promise<any> {
     try {
       // return await this.courseRepository.findOneOrFail({
       //   where: { id: id },
@@ -163,12 +163,46 @@ export class CoursesService {
         ],
       });
 
-      // Sắp xếp tăng dần theo order của lesson
+      const lessonsAndAssignments: Array<{
+        type: string;
+        order: number;
+        item: any;
+      }> = [];
+
       course.section.forEach((section) => {
-        section.lesson.sort((a, b) => a.order - b.order);
+        // Thêm các bài học vào mảng lessonsAndAssignments
+        lessonsAndAssignments.push(
+          ...section.lesson.map((lesson) => ({
+            type: 'lesson',
+            order: lesson.order,
+            item: lesson,
+          })),
+        );
+
+        // Thêm các bài tập vào mảng lessonsAndAssignments
+        lessonsAndAssignments.push(
+          ...section.assignment.map((assignment) => ({
+            type: 'assignment',
+            order: assignment.order,
+            item: assignment,
+          })),
+        );
       });
 
-      return course;
+      // Sắp xếp mảng lessonsAndAssignments theo biến order
+      lessonsAndAssignments.sort((a, b) => a.order - b.order);
+
+      // Đếm số lượng bài học
+      let lessonCount = 0;
+      course.section.forEach((section) => {
+        lessonCount += section.lesson.length;
+      });
+
+      return {
+        ...course,
+        lessonCount: lessonCount,
+        lessonsAndAssignments: lessonsAndAssignments,
+      };
     } catch (e) {
       throw new HttpException(
         `There's an error when get course by id ${e}`,
@@ -465,7 +499,7 @@ export class CoursesService {
 
     return {
       course,
-      statusCode: HttpStatus.OK,
+      status: HttpStatus.OK,
       message: 'Update course successfully',
     };
   }
