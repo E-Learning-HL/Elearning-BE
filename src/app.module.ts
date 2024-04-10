@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import databaseConfig from './common/config/database.config';
 import authConfig from './common/config/auth.config';
 import appConfig from './common/config/app.config';
-// import mailConfig from './common/config/mail.config';
+import mailConfig from './common/config/mail.config';
 import fileConfig from './common/config/file.config';
 // import facebookConfig from './common/config/facebook.config';
 // import googleConfig from './common/config/google.config';
@@ -25,8 +25,8 @@ import { FilesModule } from './common/files/files.module';
 // import { AuthGoogleModule } from './modules/auth/auth-google/auth-google.module';
 // import { AuthTwitterModule } from './modules/auth/auth-twitter/auth-twitter.module';
 // import { AuthAppleModule } from './modules/auth/auth-apple/auth-apple.module';
-// import { MailModule } from './common/mail/mail.module';
-// import { MailerModule } from './common/mailer/mailer.module';
+import { MailModule } from './common/mail/mail.module';
+import { MailerModule } from './common/mailer/mailer.module';
 // import { ForgotModule } from './modules/forgot/forgot.module';
 // import { ChannelModule } from './modules/website_slides/slide-channel/slide-channel.module';
 // import { SessionModule } from './modules/session/session.module';
@@ -45,8 +45,7 @@ import { LessonsModule } from './modules/lessons/lessons.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { PaymentMethodsModule } from './modules/payment_methods/payment_methods.module';
 import { AssignmentsModule } from './modules/assignments/assignments.module';
-import { ExamItemsModule } from './modules/tasks/tasks.module';
-import { ExamTypesModule } from './modules/exam_types/exam_types.module';
+import { TasksModule } from './modules/tasks/tasks.module';
 import { FileModule } from './modules/file/file.module';
 import minioConfig from './common/config/minio.config';
 import { MinioModule } from 'nestjs-minio-client';
@@ -54,6 +53,8 @@ import { QuestionsModule } from './modules/questions/questions.module';
 import { AnswersModule } from './modules/answers/answers.module';
 import { PaymentDetailsModule } from './modules/payment_details/payment_details.module';
 import { JobsModule } from './jobs/jobs.module';
+import { ScoresModule } from './modules/scores/scores.module';
+import { UserAnswersModule } from './modules/user_answers/user_answers.module';
 
 @Module({
   imports: [
@@ -63,7 +64,7 @@ import { JobsModule } from './jobs/jobs.module';
         databaseConfig,
         authConfig,
         appConfig,
-        // mailConfig,
+        mailConfig,
         fileConfig,
         // facebookConfig,
         // googleConfig,
@@ -109,8 +110,8 @@ import { JobsModule } from './jobs/jobs.module';
     // AuthTwitterModule,
     // AuthAppleModule,
     // ForgotModule,
-    // MailModule,
-    // MailerModule,
+    MailModule,
+    MailerModule,
     // HomeModule,
     // ChannelModule,
     // SessionModule,
@@ -128,13 +129,14 @@ import { JobsModule } from './jobs/jobs.module';
     PaymentsModule,
     PaymentMethodsModule,
     AssignmentsModule,
-    ExamItemsModule,
-    ExamTypesModule,
+    TasksModule,
     FileModule,
     QuestionsModule,
     AnswersModule,
     PaymentDetailsModule,
     JobsModule,
+    ScoresModule,
+    UserAnswersModule,
   ],
 })
 export class AppModule {}

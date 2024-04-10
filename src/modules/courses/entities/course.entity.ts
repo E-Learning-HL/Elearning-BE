@@ -65,18 +65,24 @@ export class Course extends BaseEntity {
   })
   isActive: boolean;
 
-  @OneToMany(() => Section, (section) => section.course)
+  @OneToMany(() => Section, (section) => section.course, { cascade: true })
   section: Section[];
 
-  @OneToMany(() => Assignment, (assignment) => assignment.course)
+  @OneToMany(() => Assignment, (assignment) => assignment.course, {
+    cascade: true,
+  })
   assignment: Assignment[];
 
-  @OneToMany(() => Enrolment, (enrolment) => enrolment.course)
+  @OneToMany(() => Enrolment, (enrolment) => enrolment.course, {
+    cascade: true,
+  })
   enrolment: Enrolment[];
 
-  @OneToMany(() => FileEntity, (file) => file.course)
+  @OneToMany(() => FileEntity, (file) => file.course, { cascade: true })
   file: FileEntity[];
 
-  @OneToMany(() => PaymentDetail, (paymentDetail) => paymentDetail.course)
+  @OneToMany(() => PaymentDetail, (paymentDetail) => paymentDetail.course, {
+    cascade: true,
+  })
   paymentDetail: PaymentDetail[];
 }

@@ -27,16 +27,15 @@ export class LessonsController {
     return this.lessonsService.findAll();
   }
 
+  // @ApiBearerAuth('access-token')
+  // @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.lessonsService.findOne(+id);
+  findOne(@Param('id') id: number) {
+    return this.lessonsService.findOne(id);
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateLessonDto: UpdateLessonDto,
-  ) {
+  update(@Param('id') id: string, @Body() updateLessonDto: UpdateLessonDto) {
     return this.lessonsService.update(+id, updateLessonDto);
   }
 
