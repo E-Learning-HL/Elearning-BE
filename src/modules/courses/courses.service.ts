@@ -118,7 +118,29 @@ export class CoursesService {
   async findOne(id: number): Promise<Course | null> {
     try {
       return await this.courseRepository.findOneOrFail({
-        where: { id: id },
+        where: {
+          id: id,
+        },
+        relations: ['section', 'section.lesson', 'section.lesson.file', 'file'],
+      });
+    } catch (e) {
+      throw new HttpException(
+        "There's an error when get course by id",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async findCoursePublic(
+    id: number,
+    isActive: boolean,
+  ): Promise<Course | null> {
+    try {
+      return await this.courseRepository.findOneOrFail({
+        where: {
+          id: id,
+          isActive: isActive,
+        },
         relations: ['section', 'section.lesson', 'section.lesson.file', 'file'],
       });
     } catch (e) {

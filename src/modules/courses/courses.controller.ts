@@ -92,6 +92,14 @@ export class CoursesController {
 
   // @ApiBearerAuth('access-token')
   // @UseGuards(JwtAuthGuard)
+  @Get('get-course-public/:id')
+  findCoursePublic(@Param('id') id: number) {
+    const isActive = true;
+    return this.coursesService.findCoursePublic(id, isActive);
+  }
+
+  // @ApiBearerAuth('access-token')
+  // @UseGuards(JwtAuthGuard)
   @Put(':id')
   updateCourse(
     @Param('id') id: number,
