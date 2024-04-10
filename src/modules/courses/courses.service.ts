@@ -148,10 +148,6 @@ export class CoursesService {
 
   async findOne(id: number): Promise<any> {
     try {
-      // return await this.courseRepository.findOneOrFail({
-      //   where: { id: id },
-      //   relations: ['section', 'section.lesson', 'section.lesson.file', 'file'],
-      // });
       const course = await this.courseRepository.findOneOrFail({
         where: { id: id },
         relations: [
@@ -208,6 +204,73 @@ export class CoursesService {
         `There's an error when get course by id ${e}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    }
+  }
+
+  async findCoursePublic(id: number, isActive: boolean): Promise<any> {
+    try {
+      const course = await this.courseRepository.findOneOrFail({
+        where: {
+          id: id,
+          isActive: isActive,
+        },
+        relations: [
+          'section',
+          'section.lesson',
+          'section.assignment',
+          'section.lesson.file',
+          'file',
+        ],
+      });
+      if (!course) {
+        throw new NotFoundException({
+          message: 'Courses not found',
+          status: HttpStatus.NOT_FOUND,
+        });
+      }
+
+      const lessonsAndAssignments: Array<{
+        type: string;
+        order: number;
+        item: any;
+      }> = [];
+
+      course.section.forEach((section) => {
+        // Thêm các bài học vào mảng lessonsAndAssignments
+        lessonsAndAssignments.push(
+          ...section.lesson.map((lesson) => ({
+            type: 'lesson',
+            order: lesson.order,
+            item: lesson,
+          })),
+        );
+
+        // Thêm các bài tập vào mảng lessonsAndAssignments
+        lessonsAndAssignments.push(
+          ...section.assignment.map((assignment) => ({
+            type: 'assignment',
+            order: assignment.order,
+            item: assignment,
+          })),
+        );
+      });
+
+      // Sắp xếp mảng lessonsAndAssignments theo biến order
+      lessonsAndAssignments.sort((a, b) => a.order - b.order);
+
+      // Đếm số lượng bài học
+      let lessonCount = 0;
+      course.section.forEach((section) => {
+        lessonCount += section.lesson.length;
+      });
+
+      return {
+        ...course,
+        lessonCount: lessonCount,
+        lessonsAndAssignments: lessonsAndAssignments,
+      };
+    } catch (e) {
+      throw new HttpException(`Course is not found`, HttpStatus.NOT_FOUND);
     }
   }
 
