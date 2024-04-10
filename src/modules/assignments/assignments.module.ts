@@ -8,12 +8,20 @@ import { FileService } from '../file/file.service';
 import { Task } from '../tasks/entities/task.entity';
 import { Question } from '../questions/entities/question.entity';
 import { Answer } from '../answers/entities/answer.entity';
+import { Lesson } from '../lessons/entities/lesson.entity';
 
 @Module({
   controllers: [AssignmentsController],
   providers: [AssignmentsService, FileService],
   imports: [
-    TypeOrmModule.forFeature([Assignment, Task, Question, Answer, FileEntity]),
+    TypeOrmModule.forFeature([
+      Assignment,
+      Task,
+      Question,
+      Answer,
+      FileEntity,
+      Lesson,
+    ]),
   ],
   exports: [AssignmentsService],
 })

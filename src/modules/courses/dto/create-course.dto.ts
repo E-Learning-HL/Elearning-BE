@@ -71,10 +71,9 @@ export class CreateCourseDto {
   @IsString()
   reading: string;
 
-  @ApiProperty({ example: [100, 300] })
-  @IsArray()
-  @ArrayMinSize(2)
-  course_level: number[];
+  @ApiProperty({ example: '100-300' })
+  @IsString()
+  course_level: string;
 
   @ApiProperty()
   @IsBoolean()

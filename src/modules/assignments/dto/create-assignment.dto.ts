@@ -6,12 +6,15 @@ import { QUESTION_TYPE } from 'src/modules/questions/constants/question-type.enu
 
 class File {
   @ApiProperty()
+  @IsOptional()
   response: string;
 
   @ApiProperty()
+  @IsOptional()
   type: string;
 
   @ApiProperty()
+  @IsOptional()
   name: string;
 }
 
@@ -20,15 +23,15 @@ class Answer {
   title: string;
 
   @ApiProperty()
-  is_correct: boolean;
+  isCorrect: boolean;
 }
 
 class Question {
   @ApiProperty()
   title: string;
 
-  //   @ApiProperty()
-  //   question_type: QUESTION_TYPE;
+  @ApiProperty()
+  questionType: QUESTION_TYPE;
 
   @ApiProperty({
     type: [Answer],
@@ -36,52 +39,19 @@ class Question {
   answer: Answer[];
 }
 
-// class ListeningQuestion {
-//   @ApiProperty({
-//     type: [File],
-//   })
-//   audio: File[];
-
-//   @ApiProperty()
-//   content: string;
-
-//   @ApiProperty({
-//     type: [Question],
-//   })
-//   question: Question[];
-// }
-
-// class ReadingQuestion {
-//   @ApiProperty()
-//   content: string;
-
-//   @ApiProperty({
-//     type: [Question],
-//   })
-//   question: Question[];
-// }
-
 class Task {
   @ApiProperty()
+  @IsOptional()
   content: string;
 
   @ApiProperty({
     type: [File],
   })
+  @IsOptional()
   audio: File[];
 
-  // @ApiProperty({
-  //   type: [ListeningQuestion],
-  // })
-  // listening: ListeningQuestion[];
-
-  // @ApiProperty({
-  //   type: [ReadingQuestion],
-  // })
-  // reading: ReadingQuestion[];
-
   @ApiProperty()
-  task_type: TASK_TYPE;
+  taskType: TASK_TYPE;
 
   @ApiProperty({
     type: [Question],
@@ -102,17 +72,17 @@ export class CreateAssignmentDto {
     nullable: true,
   })
   @IsOptional()
-  course_id: number;
+  courseId: number;
 
   @ApiProperty({
     nullable: true,
   })
   @IsOptional()
-  section_id: number;
+  sectionId: number;
 
   @ApiProperty()
   @IsOptional()
-  exam_type: ASSIGNINMENT_TYPE;
+  examType: ASSIGNINMENT_TYPE;
 
   @ApiProperty({
     type: [Task],

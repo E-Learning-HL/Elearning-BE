@@ -185,7 +185,13 @@ export class PaymentsService {
 
     const keyword = search.trim();
     if (keyword !== '') {
-      searchCondition.where = [{ status: Like(`%${keyword}%`) }];
+      searchCondition.where = [
+        {
+          user: {
+            name: Like(`%${keyword}%`),
+          },
+        },
+      ];
     }
 
     const [payments, total] = await this.paymentRepository.findAndCount(
@@ -244,6 +250,7 @@ export class PaymentsService {
         const enrolment = new Enrolment();
         enrolment.course = course;
         enrolment.user = user;
+        enrolment.isActive = true;
 
         console.log(`course : ${enrolment.course}, user : ${enrolment.user}`);
 
@@ -264,15 +271,4 @@ export class PaymentsService {
       );
     }
   }
-
-  remove(id: number) {
-    return `This action removes a #${id} payment`;
-  }
-}
-function TransactionRepository(): (
-  target: PaymentsService,
-  propertyKey: 'create',
-  parameterIndex: 2,
-) => void {
-  throw new Error('Function not implemented.');
 }

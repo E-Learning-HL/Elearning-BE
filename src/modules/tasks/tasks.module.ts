@@ -6,4 +6,4 @@ import { TasksController } from './tasks.controller';
   controllers: [TasksController],
   providers: [TasksService],
 })
-export class ExamItemsModule {}
+export class TasksModule {}

@@ -67,7 +67,7 @@ export class PaymentsController {
       return paymentList;
     } catch (error) {
       throw new HttpException(
-        `Failed to get list course ${error}`,
+        `Failed to get list payment ${error}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -83,18 +83,15 @@ export class PaymentsController {
     return this.paymentsService.findById(id);
   }
 
-  @Put('update-payment/:id')
+  // @ApiBearerAuth('access-token')
+  // @UseGuards(JwtAuthGuard)
+  @Patch('update-payment/:id')
   update(
     @Param('id') id: number,
     @Body() updateStatusPaymentDto: UpdateStatusPaymentDto,
   ) {
     return this.paymentsService.updateStatusPayment(id, updateStatusPaymentDto);
   }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto) {
-  //   return this.paymentsService.update(+id, updatePaymentDto);
-  // }
 
   // @Delete(':id')
   // remove(@Param('id') id: string) {

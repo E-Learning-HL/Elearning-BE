@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as Minio from 'minio';
 import { Repository } from 'typeorm';
@@ -14,7 +14,7 @@ export class FileService {
 
   constructor(
     @InjectRepository(FileEntity)
-    private fileRebository: Repository<FileEntity>,
+    private fileRepository: Repository<FileEntity>,
   ) {
     this.minioClient = new Minio.Client({
       endPoint: process.env.MINIO_HOST || 'localhost',
@@ -88,6 +88,53 @@ export class FileService {
       task.id = taskId;
       fileEntity.task = task;
     }
-    return await this.fileRebository.save(fileEntity);
+    return await this.fileRepository.save(fileEntity);
+  }
+
+  async updateFile(
+    id: number,
+    url: string,
+    courseId: number | null,
+    lessonId: number | null,
+    taskId: number | null,
+  ): Promise<FileEntity> {
+    const file = await this.fileRepository.findOne({ where: { id: id } });
+
+    if (!file) {
+      throw new NotFoundException(`File with id ${id} not found`);
+    }
+
+    file.url = url;
+
+    if (courseId !== null) {
+      const course = new Course();
+      course.id = courseId;
+      file.course = course;
+    }
+
+    if (lessonId !== null) {
+      const lesson = new Lesson();
+      lesson.id = lessonId;
+      file.lesson = lesson;
+    }
+
+    if (taskId !== null) {
+      const task = new Task();
+      task.id = taskId;
+      file.task = task;
+    }
+    return await this.fileRepository.save(file);
+  }
+
+  async checkFileExists(id: number): Promise<FileEntity | false> {
+    const file = await this.fileRepository.findOne({ where: { id: id } });
+    if (!file) {
+      return false;
+    }
+    return file;
+  }
+
+  async deleteFile(id: number): Promise<void> {
+    await this.fileRepository.delete(id);
   }
 }

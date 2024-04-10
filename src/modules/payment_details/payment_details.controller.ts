@@ -16,8 +16,9 @@ import { PaymentDetailsService } from './payment_details.service';
 import { CreatePaymentDetailDto } from './dto/create-payment_detail.dto';
 import { UpdatePaymentDetailDto } from './dto/update-payment_detail.dto';
 import { PaymentDetail } from './entities/payment_detail.entity';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Payment Details')
 @Controller('payment-details')
 export class PaymentDetailsController {
   constructor(private readonly paymentDetailsService: PaymentDetailsService) {}
