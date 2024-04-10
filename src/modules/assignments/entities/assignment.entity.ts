@@ -20,9 +20,11 @@ export class Assignment extends BaseEntity {
 
   @Column({
     name: 'assignment_type',
+    type: 'enum',
+    enum: ASSIGNINMENT_TYPE,
     nullable: true,
   })
-  assignmentType: string;
+  assignmentType: ASSIGNINMENT_TYPE;
 
   @Column({
     nullable: true,
@@ -31,14 +33,20 @@ export class Assignment extends BaseEntity {
   })
   isActive: boolean;
 
-  @ManyToOne(() => Course, (course) => course.assignment, { nullable: true })
+  @ManyToOne(() => Course, (course) => course.assignment, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'course_id' })
   course: Course;
 
-  @ManyToOne(() => Section, (section) => section.assignment, { nullable: true })
+  @ManyToOne(() => Section, (section) => section.assignment, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'section_id' })
   section: Section;
 
-  @OneToMany(() => Task, (task) => task.assignment)
+  @OneToMany(() => Task, (task) => task.assignment, { cascade: true })
   task: Task[];
 }

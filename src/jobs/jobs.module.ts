@@ -6,8 +6,8 @@ import { PaymentsModule } from 'src/modules/payments/payments.module';
 import { StatusPaymentsUpdateJob } from './update-status-payment/update-status-payments.job';
 
 @Module({
-  controllers: [JobsController],
+  // controllers: [JobsController],
   providers: [JobsService, StatusPaymentsUpdateJob],
-  imports: [ScheduleModule.forRoot(), PaymentsModule]
+  imports: [ScheduleModule.forRoot(), PaymentsModule],
 })
 export class JobsModule {}

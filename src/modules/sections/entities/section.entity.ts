@@ -8,7 +8,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 export class Section extends BaseEntity {
   @Column({
     nullable: true,
-    name : 'name_section'
+    name: 'name_section',
   })
   nameSection: string;
 
@@ -16,9 +16,11 @@ export class Section extends BaseEntity {
   @JoinColumn({ name: 'course_id' })
   course: Course;
 
-  @OneToMany(() => Lesson, (lesson) => lesson.section,  { cascade: true })
+  @OneToMany(() => Lesson, (lesson) => lesson.section, { cascade: true })
   lesson: Lesson[];
 
-  @OneToMany(() => Assignment, (assignment) => assignment.section)
+  @OneToMany(() => Assignment, (assignment) => assignment.section, {
+    cascade: true,
+  })
   assignment: Assignment[];
 }

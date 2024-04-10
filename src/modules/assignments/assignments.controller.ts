@@ -12,6 +12,7 @@ import {
   Query,
   HttpException,
   HttpStatus,
+  Put,
 } from '@nestjs/common';
 import { AssignmentsService } from './assignments.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
@@ -30,6 +31,7 @@ export class AssignmentsController {
   // @UseGuards(JwtAuthGuard)
   @Post('create-assignment')
   async create(@Body() createAssignmentDto: CreateAssignmentDto) {
+    // console.log('createAssignmentDto', createAssignmentDto);
     const assignments = await this.assignmentsService.create(
       createAssignmentDto,
     );
@@ -80,16 +82,21 @@ export class AssignmentsController {
     return this.assignmentsService.findOne(id);
   }
 
+  // @ApiBearerAuth('access-token')
+  // @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateAssignmentDto: UpdateAssignmentDto,
   ) {
-    return this.assignmentsService.update(+id, updateAssignmentDto);
+    return this.assignmentsService.update(id, updateAssignmentDto);
   }
 
+  // @ApiBearerAuth('access-token')
+  // @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.assignmentsService.remove(+id);
+  async remove(@Param('id') id: number): Promise<{ message: string }> {
+    const result = await this.assignmentsService.remove(id);
+    return { message: result };
   }
 }

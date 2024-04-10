@@ -92,7 +92,7 @@ export class CoursesController {
 
   // @ApiBearerAuth('access-token')
   // @UseGuards(JwtAuthGuard)
-  @Put(':id')
+  @Patch(':id')
   updateCourse(
     @Param('id') id: number,
     @Body() updateCourseDto: UpdateCourseDto,
@@ -102,8 +102,9 @@ export class CoursesController {
 
   // @ApiBearerAuth('access-token')
   // @UseGuards(JwtAuthGuard)
-  // @Delete(':id')
-  // remove(@Param('id') id: number) {
-  //   return this.coursesService.remove(id);
-  // }
+  @Delete(':id')
+  async remove(@Param('id') id: number): Promise<{ message: string }> {
+    const result = await this.coursesService.deleteCourseById(id);
+    return { message: result };
+  }
 }

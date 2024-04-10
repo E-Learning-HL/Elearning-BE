@@ -2,6 +2,8 @@ import { Exclude } from 'class-transformer';
 import { BaseEntity } from 'src/database/base/base.entity';
 import { Enrolment } from 'src/modules/enrolments/entities/enrolment.entity';
 import { Payment } from 'src/modules/payments/entities/payment.entity';
+import { Score } from 'src/modules/scores/entities/score.entity';
+import { UserAnswer } from 'src/modules/user_answers/entities/user_answer.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 @Entity('accounts')
 export class User extends BaseEntity {
@@ -37,9 +39,15 @@ export class User extends BaseEntity {
   })
   name: string;
 
-  @OneToMany(() => Enrolment, (enrolment) => enrolment.user)
+  @OneToMany(() => Enrolment, (enrolment) => enrolment.user, { cascade: true })
   enrolment: Enrolment[];
 
-  @OneToMany(() => Payment, (payment) => payment.user)
+  @OneToMany(() => Payment, (payment) => payment.user, { cascade: true })
   payment: Payment[];
+
+  @OneToMany(() => Score, (score) => score.user, { cascade: true })
+  score: Score[];
+
+  @OneToMany(() => UserAnswer, (userAnser) => userAnser.user, { cascade: true })
+  userAnser: UserAnswer[];
 }

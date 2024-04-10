@@ -6,12 +6,15 @@ import { QUESTION_TYPE } from 'src/modules/questions/constants/question-type.enu
 
 class File {
   @ApiProperty()
+  @IsOptional()
   response: string;
 
   @ApiProperty()
+  @IsOptional()
   type: string;
 
   @ApiProperty()
+  @IsOptional()
   name: string;
 }
 
@@ -27,8 +30,8 @@ class Question {
   @ApiProperty()
   title: string;
 
-  //   @ApiProperty()
-  //   question_type: QUESTION_TYPE;
+  @ApiProperty()
+  question_type: QUESTION_TYPE;
 
   @ApiProperty({
     type: [Answer],
@@ -36,49 +39,16 @@ class Question {
   answer: Answer[];
 }
 
-// class ListeningQuestion {
-//   @ApiProperty({
-//     type: [File],
-//   })
-//   audio: File[];
-
-//   @ApiProperty()
-//   content: string;
-
-//   @ApiProperty({
-//     type: [Question],
-//   })
-//   question: Question[];
-// }
-
-// class ReadingQuestion {
-//   @ApiProperty()
-//   content: string;
-
-//   @ApiProperty({
-//     type: [Question],
-//   })
-//   question: Question[];
-// }
-
 class Task {
   @ApiProperty()
+  @IsOptional()
   content: string;
 
   @ApiProperty({
     type: [File],
   })
+  @IsOptional()
   audio: File[];
-
-  // @ApiProperty({
-  //   type: [ListeningQuestion],
-  // })
-  // listening: ListeningQuestion[];
-
-  // @ApiProperty({
-  //   type: [ReadingQuestion],
-  // })
-  // reading: ReadingQuestion[];
 
   @ApiProperty()
   task_type: TASK_TYPE;

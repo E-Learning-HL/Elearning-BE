@@ -22,14 +22,16 @@ export class SectionsController {
     return this.sectionsService.create(createSectionDto);
   }
 
-  @Get()
+  @Get('get-list')
   findAll() {
     return this.sectionsService.findAll();
   }
 
+  // @ApiBearerAuth('access-token')
+  // @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.sectionsService.findOne(+id);
+  findOne(@Param('id') id: number) {
+    return this.sectionsService.findOne(id);
   }
 
   @Patch(':id')

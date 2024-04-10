@@ -61,22 +61,40 @@ export class CoursesService {
       section.course = courseResult;
       const sectionResult = await this.sectionRepository.save(section);
 
-      item?.lessons?.forEach(async (lessonItem) => {
+      // item?.lessons?.forEach(async (lessonItem) => {
+      //   const lesson = new Lesson();
+      //   lesson.nameLesson = lessonItem.name;
+      //   lesson.section = sectionResult;
+      //   lesson.isActive = true;
+      //   lesson.order = 1; // order = count(lesson + assignment) với sectionId vừa tạo
+
+      //   const lessonReusult = await this.lessonRepository.save(lesson);
+
+      //   const fileUrl = await this.fileService.uploadBase64File(
+      //     lessonItem.video[0].response,
+      //     lessonItem.video[0].type,
+      //     lessonItem.video[0].name,
+      //   );
+      //   await this.fileService.saveFile(fileUrl, null, lessonReusult.id, null);
+      // });
+      const lessons = item?.lessons || [];
+      for (let i = 0; i < lessons.length; i++) {
+        const lessonItem = lessons[i];
         const lesson = new Lesson();
         lesson.nameLesson = lessonItem.name;
         lesson.section = sectionResult;
         lesson.isActive = true;
-        lesson.order = 1; // order = count(lesson + assignment) với sectionId vừa tạo
+        lesson.order = i + 1; // Tăng dần giá trị order theo số lượng lesson trong section
 
-        const lessonReusult = await this.lessonRepository.save(lesson);
+        const lessonResult = await this.lessonRepository.save(lesson);
 
         const fileUrl = await this.fileService.uploadBase64File(
           lessonItem.video[0].response,
           lessonItem.video[0].type,
           lessonItem.video[0].name,
         );
-        await this.fileService.saveFile(fileUrl, null, lessonReusult.id, null);
-      });
+        await this.fileService.saveFile(fileUrl, null, lessonResult.id, null);
+      }
     });
 
     return {
@@ -102,7 +120,13 @@ export class CoursesService {
       order: { id: sort },
       skip: offset,
       take: limit,
-      relations: ['section', 'section.lesson', 'section.lesson.file', 'file'],
+      relations: [
+        'section',
+        'section.lesson',
+        'section.assignment',
+        'section.lesson.file',
+        'file',
+      ],
     };
 
     const keyword = search.trim();
@@ -124,13 +148,30 @@ export class CoursesService {
 
   async findOne(id: number): Promise<Course | null> {
     try {
-      return await this.courseRepository.findOneOrFail({
+      // return await this.courseRepository.findOneOrFail({
+      //   where: { id: id },
+      //   relations: ['section', 'section.lesson', 'section.lesson.file', 'file'],
+      // });
+      const course = await this.courseRepository.findOneOrFail({
         where: { id: id },
-        relations: ['section', 'section.lesson', 'section.lesson.file', 'file'],
+        relations: [
+          'section',
+          'section.lesson',
+          'section.assignment',
+          'section.lesson.file',
+          'file',
+        ],
       });
+
+      // Sắp xếp tăng dần theo order của lesson
+      course.section.forEach((section) => {
+        section.lesson.sort((a, b) => a.order - b.order);
+      });
+
+      return course;
     } catch (e) {
       throw new HttpException(
-        "There's an error when get course by id",
+        `There's an error when get course by id ${e}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -162,7 +203,9 @@ export class CoursesService {
         'COUNT(lesson.id) As countLesson', // Đếm số lượng bài học trong mỗi khóa học
       ])
       .groupBy('course.id')
+      .addGroupBy('lesson.order')
       .orderBy('course.start', 'ASC')
+      .addOrderBy('lesson.order', 'ASC')
       .getRawMany();
 
     if (!courses) {
@@ -174,55 +217,6 @@ export class CoursesService {
 
     return courses;
   }
-
-  // async update(id: number, updateCourseDto: UpdateCourseDto): Promise<Course> {
-  //   const courseToUpdate = await this.courseRepository.findOne({
-  //     where: { id: id },
-  //   });
-
-  //   if (!courseToUpdate) {
-  //     throw new NotFoundException(`Course with ID ${id} not found`);
-  //   }
-
-  //   // Update course properties if they exist in the DTO
-  //   if (updateCourseDto.name) {
-  //     courseToUpdate.nameCourse = updateCourseDto.name;
-  //   }
-  //   if (updateCourseDto.price) {
-  //     courseToUpdate.price = updateCourseDto.price;
-  //   }
-  //   if (updateCourseDto.introduce) {
-  //     courseToUpdate.introduce = updateCourseDto.introduce;
-  //   }
-  //   if (updateCourseDto.listening) {
-  //     courseToUpdate.listening = updateCourseDto.listening;
-  //   }
-  //   if (updateCourseDto.speaking) {
-  //     courseToUpdate.speaking = updateCourseDto.speaking;
-  //   }
-  //   if (updateCourseDto.reading) {
-  //     courseToUpdate.reading = updateCourseDto.reading;
-  //   }
-  //   if (updateCourseDto.writing) {
-  //     courseToUpdate.writing = updateCourseDto.writing;
-  //   }
-  //   if (updateCourseDto.course_level) {
-  //     courseToUpdate.start = updateCourseDto.course_level[0];
-  //     courseToUpdate.target = updateCourseDto.course_level[1];
-  //   }
-  //   if (updateCourseDto.status !== undefined) {
-  //     courseToUpdate.isActive = updateCourseDto.status;
-  //   }
-
-  //   // Save the updated course to the database
-  //   const updatedCourse = await this.courseRepository.save(courseToUpdate);
-
-  //   return updatedCourse;
-  // }
-
-  // async remove(id: number) {
-  //   return await this.courseRepository.delete(id);
-  // }
 
   async update(id: number, updateCourseDto: UpdateCourseDto): Promise<any> {
     const oldCourse = await this.courseRepository.findOne({
@@ -277,7 +271,6 @@ export class CoursesService {
       const oldFile = await this.fileRepository.findOne({
         where: { course: { id: oldCourse.id } },
       });
-      console.log('oldFile', oldFile);
       if (oldFile) {
         await this.fileService.deleteFile(oldFile?.id);
 
@@ -286,8 +279,6 @@ export class CoursesService {
           updatedCover.type,
           updatedCover.name,
         );
-        console.log('fileUrl', fileUrl);
-        console.log('oldCourseID', id);
         await this.fileService.saveFile(fileUrl, id, null, null);
       } else {
         const fileUrl = await this.fileService.uploadBase64File(
@@ -295,8 +286,6 @@ export class CoursesService {
           updatedCover.type,
           updatedCover.name,
         );
-        console.log('fileUrl', fileUrl);
-        console.log('oldCourseID', id);
         await this.fileService.saveFile(fileUrl, id, null, null);
       }
     }
@@ -315,7 +304,6 @@ export class CoursesService {
         (item) => !newSectionId.includes(item),
       );
 
-      console.log('sectionToDelete', sectionToDelete);
       for (const sectionId of sectionToDelete) {
         const lessonsToDelete = await this.lessonRepository.find({
           where: { section: { id: sectionId } },
@@ -346,12 +334,12 @@ export class CoursesService {
           const sectionResult = await this.sectionRepository.save(newSection);
 
           await Promise.all(
-            item.lessons.map(async (lessonItem) => {
+            item.lessons.map(async (lessonItem, index) => {
               const lesson = new Lesson();
               lesson.nameLesson = lessonItem.name;
               lesson.section = sectionResult;
               lesson.isActive = true;
-              lesson.order = 1;
+              lesson.order = index + 1;
 
               const lessonResult = await this.lessonRepository.save(lesson);
 
@@ -413,11 +401,12 @@ export class CoursesService {
           });
           if (oldSection) {
             await Promise.all(
-              item.lessons.map(async (itemLesson) => {
+              item.lessons.map(async (itemLesson, index) => {
                 if (!itemLesson.lessonId) {
                   const newLesson = new Lesson();
                   newLesson.nameLesson = itemLesson.name;
                   newLesson.section = oldSection;
+                  newLesson.order = index + 1;
                   const lessonResult = await this.lessonRepository.save(
                     newLesson,
                   );
@@ -428,12 +417,11 @@ export class CoursesService {
                     itemLesson.video[0].name,
                   );
                   Logger.debug('fileUrl cuar lesson', fileUrl);
-                  Logger.debug('lessonReusult.id lesson', lessonResult);
-                  Logger.debug('lessonReusult.id lesson', itemLesson.lessonId);
+                  Logger.debug('lessonResult.id lesson', lessonResult.id);
                   await this.fileService.saveFile(
                     fileUrl,
                     null,
-                    itemLesson.lessonId,
+                    lessonResult.id,
                     null,
                   );
                 } else {
@@ -480,5 +468,14 @@ export class CoursesService {
       statusCode: HttpStatus.OK,
       message: 'Update course successfully',
     };
+  }
+
+  async deleteCourseById(id: number): Promise<string> {
+    const course = await this.courseRepository.findOne({ where: { id: id } });
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+    await this.courseRepository.remove(course);
+    return 'Course deleted successfully';
   }
 }
