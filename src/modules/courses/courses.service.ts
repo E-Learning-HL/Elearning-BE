@@ -281,26 +281,29 @@ export class CoursesService {
     const courses = await this.courseRepository
       .createQueryBuilder('course')
       .leftJoinAndSelect('course.section', 'section')
+      .leftJoin('course.file', 'file')
       .leftJoin('section.lesson', 'lesson')
       .where('course.start >= :startPoint', { startPoint })
       .andWhere('course.target <= :endPoint', { endPoint })
       .andWhere('course.isActive = :isActive', { isActive: true })
       .select([
-        'course.id',
-        'course.nameCourse',
-        'course.price',
-        'course.introduce',
-        'course.listening',
-        'course.speaking',
-        'course.reading',
-        'course.writing',
-        'course.start',
-        'course.target',
-        'course.isActive',
+        'course.id as id',
+        'course.nameCourse as name',
+        'course.price as price',
+        'course.introduce as introduce',
+        'course.listening as listening',
+        'course.speaking as speaking',
+        'course.reading as reading',
+        'course.writing as writing',
+        'course.start as start',
+        'course.target as target',
+        'course.isActive as status',
         'COUNT(lesson.id) As countLesson', // Đếm số lượng bài học trong mỗi khóa học
+        'file.url AS url',
       ])
       .groupBy('course.id')
       .addGroupBy('lesson.order')
+      .addGroupBy('file.id')
       .orderBy('course.start', 'ASC')
       .addOrderBy('lesson.order', 'ASC')
       .getRawMany();
