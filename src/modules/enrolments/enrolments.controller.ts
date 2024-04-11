@@ -11,12 +11,15 @@ import {
   HttpStatus,
   ParseIntPipe,
   Query,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { EnrolmentsService } from './enrolments.service';
 import { CreateEnrolmentDto } from './dto/create-enrolment.dto';
 import { UpdateEnrolmentDto } from './dto/update-enrolment.dto';
-import { ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Enrolment } from './entities/enrolment.entity';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('Enrolments')
 @Controller('enrolments')
@@ -65,9 +68,11 @@ export class EnrolmentsController {
     }
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.enrolmentsService.findOne(+id);
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  findOne(@Req() req) {
+    return this.enrolmentsService.findOne(req.user.id);
   }
 
   // @ApiBearerAuth('access-token')

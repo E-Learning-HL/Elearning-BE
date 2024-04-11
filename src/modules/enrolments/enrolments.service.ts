@@ -4,6 +4,7 @@ import { UpdateEnrolmentDto } from './dto/update-enrolment.dto';
 import { Enrolment } from './entities/enrolment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, Like, Repository } from 'typeorm';
+import { use } from 'passport';
 
 @Injectable()
 export class EnrolmentsService {
@@ -59,8 +60,19 @@ export class EnrolmentsService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} enrolment`;
+  async findOne(id: number) : Promise<any> {
+    console.log("id" ,id)
+    const courses = await this.enrolmentRepository.find({
+      where : {
+        user : {id : id},
+        
+      },
+      relations : ['course']
+    })
+    if(!courses){
+      throw new NotFoundException('Bạn chưa đăng ký khóa học nào.');
+    }
+    return courses
   }
 
   async update(id: number, updateEnrolmentDto: UpdateEnrolmentDto) {
