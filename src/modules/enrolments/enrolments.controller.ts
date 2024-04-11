@@ -72,7 +72,7 @@ export class EnrolmentsController {
   @UseGuards(JwtAuthGuard)
   @Get()
   findOne(@Req() req) {
-    return this.enrolmentsService.findOne(req.user.id);
+    return this.enrolmentsService.findCourse(req.user.id);
   }
 
   // @ApiBearerAuth('access-token')

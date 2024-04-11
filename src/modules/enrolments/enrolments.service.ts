@@ -60,19 +60,23 @@ export class EnrolmentsService {
     };
   }
 
-  async findOne(id: number) : Promise<any> {
-    console.log("id" ,id)
-    const courses = await this.enrolmentRepository.find({
-      where : {
-        user : {id : id},
-        
+  async findCourse(id: number) : Promise<any> {
+    const options: FindManyOptions<Enrolment> = {
+      where: {
+        user: { id: id },
+        course: { isActive: true },
+        isActive : true
       },
-      relations : ['course', 'course.file']
-    })
-    if(!courses){
+      relations: ['course', 'course.file'],
+    };
+
+    const courses = await this.enrolmentRepository.find(options);
+
+    if (!courses.length) {
       throw new NotFoundException('Bạn chưa đăng ký khóa học nào.');
     }
-    return courses
+
+    return courses;
   }
 
   async update(id: number, updateEnrolmentDto: UpdateEnrolmentDto) {
