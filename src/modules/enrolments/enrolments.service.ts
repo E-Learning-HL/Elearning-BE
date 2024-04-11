@@ -67,7 +67,7 @@ export class EnrolmentsService {
         user : {id : id},
         
       },
-      relations : ['course']
+      relations : ['course', 'course.file']
     })
     if(!courses){
       throw new NotFoundException('Bạn chưa đăng ký khóa học nào.');
