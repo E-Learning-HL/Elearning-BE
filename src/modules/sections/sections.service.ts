@@ -22,7 +22,7 @@ export class SectionsService {
   async findOne(id: number): Promise<Section | null> {
     const section = await this.sectionRepository.findOne({
       where: { id: id },
-      relations: ['lesson'],
+      relations: ['lesson.file'],
     });
     if (!section) {
       throw new NotFoundException('Section not found');

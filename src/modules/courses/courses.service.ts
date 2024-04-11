@@ -252,9 +252,14 @@ export class CoursesService {
           })),
         );
 
+        // Thêm các bài tập có isActive = true vào mảng lessonsAndAssignments
+        const activeAssignments = section.assignment.filter(
+          (assignment) => assignment.isActive === true,
+        );
+
         // Thêm các bài tập vào mảng lessonsAndAssignments
         lessonsAndAssignments.push(
-          ...section.assignment.map((assignment) => ({
+          ...activeAssignments.map((assignment) => ({
             type: 'assignment',
             order: assignment.order,
             item: assignment,
@@ -274,7 +279,7 @@ export class CoursesService {
       return {
         ...course,
         lessonCount: lessonCount,
-        lessonsAndAssignments: lessonsAndAssignments,
+        section: lessonsAndAssignments,
       };
     } catch (e) {
       throw new HttpException(`Course is not found`, HttpStatus.NOT_FOUND);

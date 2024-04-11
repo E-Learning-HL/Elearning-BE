@@ -19,9 +19,13 @@ export class LessonsService {
     return `This action returns all lessonItems`;
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, sectionId : number) {
     const lesson = await this.lessonRepository.findOne({
-      where: { id: id },
+      where: { 
+        id: id,
+        section : {id: sectionId}
+       },
+       relations : ['file']
     });
     if (!lesson) {
       throw new NotFoundException('Lesson not found');
