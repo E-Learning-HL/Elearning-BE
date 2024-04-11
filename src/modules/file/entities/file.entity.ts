@@ -9,6 +9,9 @@ export class FileEntity extends BaseEntity {
   @Column()
   url: string;
 
+  @Column({ nullable: true })
+  name: string;
+
   @ManyToOne(() => Course, (course) => course.file, { nullable: true })
   @JoinColumn({
     name: 'course_id',
@@ -24,25 +27,4 @@ export class FileEntity extends BaseEntity {
   @ManyToOne(() => Task, (task) => task.file, { nullable: true })
   @JoinColumn({ name: 'task_id' })
   task: Task;
-
-  // @Column({ nullable: true })
-  // course_id: number | null;
-
-  // @ManyToOne(() => Course, (course) => course.file)
-  // @JoinColumn({ name: 'course_id' })
-  // course: Course;
-
-  // @Column({ nullable: true })
-  // lesson_id: number | null;
-
-  // @ManyToOne(() => Lesson, (lesson) => lesson.file)
-  // @JoinColumn({ name: 'lesson_id' })
-  // lesson: Lesson;
-
-  // @Column({ nullable: true })
-  // task_id: number | null;
-
-  // @ManyToOne(() => Task, (task) => task.file)
-  // @JoinColumn({ name: 'task_id' })
-  // task: Task;
 }

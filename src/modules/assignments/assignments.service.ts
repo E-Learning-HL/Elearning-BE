@@ -91,8 +91,14 @@ export class AssignmentsService {
           taskDto.audio[0].type,
           taskDto.audio[0].name,
         );
-
-        await this.fileService.saveFile(audioUrl, null, null, taskResult.id);
+        const name = taskDto.audio[0].name;
+        await this.fileService.saveFile(
+          audioUrl,
+          name,
+          null,
+          null,
+          taskResult.id,
+        );
       }
 
       for (const questionDto of taskDto.question) {
@@ -276,9 +282,11 @@ export class AssignmentsService {
               itemTask.audio[0].type,
               itemTask.audio[0].name,
             );
+            const name = itemTask.audio[0].name;
 
             await this.fileService.saveFile(
               audioUrl,
+              name,
               null,
               null,
               taskResult.id,
@@ -319,9 +327,11 @@ export class AssignmentsService {
                 itemTask.audio[0].type,
                 itemTask.audio[0].name,
               );
+              const name = itemTask.audio[0].name;
 
               await this.fileService.saveFile(
                 audioUrl,
+                name,
                 null,
                 null,
                 itemTask.taskId,

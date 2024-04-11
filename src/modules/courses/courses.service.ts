@@ -52,8 +52,8 @@ export class CoursesService {
       createCourseDto.cover[0].type,
       createCourseDto.cover[0].name,
     );
-
-    await this.fileService.saveFile(fileUrl, courseResult.id, null, null);
+    const name = createCourseDto.cover[0].name;
+    await this.fileService.saveFile(fileUrl, name, courseResult.id, null, null);
 
     createCourseDto?.course_section?.forEach(async (item) => {
       const section = new Section();
@@ -93,7 +93,14 @@ export class CoursesService {
           lessonItem.video[0].type,
           lessonItem.video[0].name,
         );
-        await this.fileService.saveFile(fileUrl, null, lessonResult.id, null);
+        const name = lessonItem.video[0].name;
+        await this.fileService.saveFile(
+          fileUrl,
+          name,
+          null,
+          lessonResult.id,
+          null,
+        );
       }
     });
 
@@ -287,19 +294,20 @@ export class CoursesService {
       .andWhere('course.target <= :endPoint', { endPoint })
       .andWhere('course.isActive = :isActive', { isActive: true })
       .select([
-        'course.id as id',
-        'course.nameCourse as name',
-        'course.price as price',
-        'course.introduce as introduce',
-        'course.listening as listening',
-        'course.speaking as speaking',
-        'course.reading as reading',
-        'course.writing as writing',
-        'course.start as start',
-        'course.target as target',
-        'course.isActive as status',
+        'course.id',
+        'course.nameCourse',
+        'course.price',
+        'course.introduce',
+        'course.listening',
+        'course.speaking',
+        'course.reading',
+        'course.writing',
+        'course.start',
+        'course.target',
+        'course.isActive',
         'COUNT(lesson.id) As countLesson', // Đếm số lượng bài học trong mỗi khóa học
         'file.url AS url',
+        'file.name AS nameUrl',
       ])
       .groupBy('course.id')
       .addGroupBy('lesson.order')
@@ -379,14 +387,16 @@ export class CoursesService {
           updatedCover.type,
           updatedCover.name,
         );
-        await this.fileService.saveFile(fileUrl, id, null, null);
+        const name = updatedCover.name;
+        await this.fileService.saveFile(fileUrl, name, id, null, null);
       } else {
         const fileUrl = await this.fileService.uploadBase64File(
           updatedCover.response,
           updatedCover.type,
           updatedCover.name,
         );
-        await this.fileService.saveFile(fileUrl, id, null, null);
+        const name = updatedCover.name;
+        await this.fileService.saveFile(fileUrl, name, id, null, null);
       }
     }
 
@@ -448,11 +458,10 @@ export class CoursesService {
                 lessonItem.video[0].type,
                 lessonItem.video[0].name,
               );
-
-              Logger.debug('fileUrl cuar lesson', fileUrl);
-              Logger.debug('lessonReusult.id lesson', lessonResult.id);
+              const name = lessonItem.video[0].name;
               await this.fileService.saveFile(
                 fileUrl,
+                name,
                 null,
                 lessonResult.id,
                 null,
@@ -516,10 +525,10 @@ export class CoursesService {
                     itemLesson.video[0].type,
                     itemLesson.video[0].name,
                   );
-                  Logger.debug('fileUrl cuar lesson', fileUrl);
-                  Logger.debug('lessonResult.id lesson', lessonResult.id);
+                  const name = itemLesson.video[0].name;
                   await this.fileService.saveFile(
                     fileUrl,
+                    name,
                     null,
                     lessonResult.id,
                     null,
@@ -547,8 +556,10 @@ export class CoursesService {
                         itemLesson.video[0].type,
                         itemLesson.video[0].name,
                       );
+                      const name = itemLesson.video[0].name;
                       await this.fileService.saveFile(
                         fileUrl,
+                        name,
                         null,
                         lessonResult.id,
                         null,
@@ -564,7 +575,6 @@ export class CoursesService {
     }
 
     return {
-      course,
       status: HttpStatus.OK,
       message: 'Update course successfully',
     };

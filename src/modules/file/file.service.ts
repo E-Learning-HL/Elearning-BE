@@ -67,12 +67,14 @@ export class FileService {
 
   async saveFile(
     url: string,
+    name: string,
     courseId: number | null,
     lessonId: number | null,
     taskId: number | null,
   ): Promise<FileEntity> {
     const fileEntity = new FileEntity();
     fileEntity.url = url;
+    fileEntity.name = name;
     if (courseId !== null) {
       const course = new Course();
       course.id = courseId;
