@@ -21,6 +21,7 @@ import { QUESTION_TYPE } from '../questions/constants/question-type.enum';
 import { logger } from 'handlebars';
 import { FileEntity } from '../file/entities/file.entity';
 import { Lesson } from '../lessons/entities/lesson.entity';
+import { ASSIGNINMENT_TYPE } from './constants/assignment-type.enum';
 
 @Injectable()
 export class AssignmentsService {
@@ -170,6 +171,32 @@ export class AssignmentsService {
       perpage: limit,
       data: assignments,
     };
+  }
+
+  async findAllCourse(courseId : number, assignmentType : ASSIGNINMENT_TYPE) : Promise<Assignment[]>{
+    try {
+      return await this.assignmentRepository.find({
+        where: { 
+          course :{
+            id : courseId,
+            isActive : true
+          },
+          assignmentType : assignmentType,
+        },
+        relations: [
+          'task',
+          'task.question',
+          'task.question.answer',
+          'task.file',
+        ],
+
+      });
+    } catch (e) {
+      throw new HttpException(
+        "There's an error when get assignment by id",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async findOne(id: number): Promise<Assignment | null> {

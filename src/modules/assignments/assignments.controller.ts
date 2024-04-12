@@ -21,6 +21,7 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Course } from '../courses/entities/course.entity';
 import { Assignment } from './entities/assignment.entity';
+import { ASSIGNINMENT_TYPE } from './constants/assignment-type.enum';
 
 @ApiTags('Assignments')
 @Controller('assignments')
@@ -80,6 +81,16 @@ export class AssignmentsController {
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.assignmentsService.findOne(id);
+  }
+
+  // @ApiBearerAuth('access-token')
+  // @UseGuards(JwtAuthGuard)
+  @Get('get-exam/:assignmentType/:courseId')
+  findAllAssignmentByCourse(
+    @Param('courseId') courseId: number,
+    @Param('assignmentType') assignmentType: ASSIGNINMENT_TYPE,
+  ) {
+    return this.assignmentsService.findAllCourse(courseId, assignmentType);
   }
 
   // @ApiBearerAuth('access-token')

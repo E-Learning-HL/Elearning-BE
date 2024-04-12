@@ -29,12 +29,11 @@ export class LessonsController {
 
   // @ApiBearerAuth('access-token')
   // @UseGuards(JwtAuthGuard)
-  @Get(':sectionId/:id')
+  @Get(':id')
   findOne(
-    @Param('id') id: number,
-    @Param('sectionId') sectionId: number
+    @Param('id') id: number
   ) {
-    return this.lessonsService.findOne(id, sectionId);
+    return this.lessonsService.findOne(id);
   }
 
   @Patch(':id')

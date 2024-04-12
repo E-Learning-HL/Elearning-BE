@@ -14,6 +14,7 @@ import { FileService } from '../file/file.service';
 import { Section } from '../sections/entities/section.entity';
 import { Lesson } from '../lessons/entities/lesson.entity';
 import { FileEntity } from '../file/entities/file.entity';
+import { ASSIGNINMENT_TYPE } from '../assignments/constants/assignment-type.enum';
 
 @Injectable()
 export class CoursesService {
@@ -254,7 +255,9 @@ export class CoursesService {
 
         // Thêm các bài tập có isActive = true vào mảng lessonsAndAssignments
         const activeAssignments = section.assignment.filter(
-          (assignment) => assignment.isActive === true,
+          (assignment) =>
+            assignment.isActive === true &&
+            assignment.assignmentType === ASSIGNINMENT_TYPE.EXERCISES,
         );
 
         // Thêm các bài tập vào mảng lessonsAndAssignments
