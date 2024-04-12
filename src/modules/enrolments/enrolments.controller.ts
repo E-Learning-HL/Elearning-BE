@@ -71,8 +71,18 @@ export class EnrolmentsController {
   @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   @Get()
-  findOne(@Req() req) {
+  find(@Req() req) {
     return this.enrolmentsService.findCourse(req.user.id);
+  }
+
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard)
+  @Get('course/:courseId')
+  findByCourse(
+    @Req() req,
+    @Param('courseId') courseId : number
+  ) {
+    return this.enrolmentsService.findOneCourse(req.user.id, courseId);
   }
 
   // @ApiBearerAuth('access-token')

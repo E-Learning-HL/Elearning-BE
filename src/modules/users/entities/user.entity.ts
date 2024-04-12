@@ -21,6 +21,7 @@ export class User extends BaseEntity {
   @Column({
     nullable: true,
     default: true,
+    name :'is_active'
   })
   isActive: boolean;
 

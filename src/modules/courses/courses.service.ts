@@ -221,6 +221,7 @@ export class CoursesService {
         where: {
           id: id,
           isActive: isActive,
+          
         },
         relations: [
           'section',

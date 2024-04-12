@@ -1,10 +1,11 @@
-import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateEnrolmentDto } from './dto/create-enrolment.dto';
 import { UpdateEnrolmentDto } from './dto/update-enrolment.dto';
 import { Enrolment } from './entities/enrolment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, Like, Repository } from 'typeorm';
 import { use } from 'passport';
+import { ASSIGNINMENT_TYPE } from '../assignments/constants/assignment-type.enum';
 
 @Injectable()
 export class EnrolmentsService {
@@ -77,6 +78,83 @@ export class EnrolmentsService {
     }
 
     return courses;
+  }
+
+  async findOneCourse(id: number, courseId : number) : Promise<any> {
+    try {
+      const course = await this.enrolmentRepository.findOne({
+        where: {
+          user: { id: id },
+        course: { isActive: true, id : courseId },
+        isActive : true
+          
+        },
+        relations: [
+          'course', 
+          'course.file',
+          'course.section',
+          'course.section.lesson',
+          'course.section.assignment',
+          'course.section.lesson.file',
+        ],
+      });
+      if (!course) {
+        throw new NotFoundException({
+          message: 'Courses not found',
+          status: HttpStatus.NOT_FOUND,
+        });
+      }
+
+      const lessonsAndAssignments: Array<{
+        type: string;
+        order: number;
+        item: any;
+      }> = [];
+
+      course.course.section.forEach((section) => {
+        // Thêm các bài học vào mảng lessonsAndAssignments
+        lessonsAndAssignments.push(
+          ...section.lesson.map((lesson) => ({
+            type: 'lesson',
+            order: lesson.order,
+            item: lesson,
+          })),
+        );
+
+        // Thêm các bài tập có isActive = true vào mảng lessonsAndAssignments
+        const activeAssignments = section.assignment.filter(
+          (assignment) =>
+            assignment.isActive === true &&
+            assignment.assignmentType === ASSIGNINMENT_TYPE.EXERCISES,
+        );
+
+        // Thêm các bài tập vào mảng lessonsAndAssignments
+        lessonsAndAssignments.push(
+          ...activeAssignments.map((assignment) => ({
+            type: 'assignment',
+            order: assignment.order,
+            item: assignment,
+          })),
+        );
+      });
+
+      // Sắp xếp mảng lessonsAndAssignments theo biến order
+      lessonsAndAssignments.sort((a, b) => a.order - b.order);
+
+      // Đếm số lượng bài học
+      let lessonCount = 0;
+      course.course.section.forEach((section) => {
+        lessonCount += section.lesson.length;
+      });
+
+      return {
+        ...course,
+        lessonCount: lessonCount,
+        section: lessonsAndAssignments,
+      };
+    } catch (e) {
+      throw new HttpException(`Course is not found`, HttpStatus.NOT_FOUND);
+    }
   }
 
   async update(id: number, updateEnrolmentDto: UpdateEnrolmentDto) {

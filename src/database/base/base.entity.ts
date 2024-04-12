@@ -31,15 +31,15 @@ export class BaseEntity extends AbstractEntity {
   })
   createdAt: Date = new Date();
 
-  @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({
-    name: 'create_uid',
-  })
-  createUser: User;
+  // @ManyToOne(() => User, (user) => user.id)
+  // @JoinColumn({
+  //   name: 'create_uid',
+  // })
+  // createUser: User;
 
-  @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({
-    name: 'write_uid',
-  })
-  writeUser: User;
+  // @ManyToOne(() => User, (user) => user.id)
+  // @JoinColumn({
+  //   name: 'write_uid',
+  // })
+  // writeUser: User;
 }

@@ -55,6 +55,7 @@ import { PaymentDetailsModule } from './modules/payment_details/payment_details.
 import { JobsModule } from './jobs/jobs.module';
 import { ScoresModule } from './modules/scores/scores.module';
 import { UserAnswersModule } from './modules/user_answers/user_answers.module';
+import { RoleModule } from './modules/role/role.module';
 
 @Module({
   imports: [
@@ -137,6 +138,7 @@ import { UserAnswersModule } from './modules/user_answers/user_answers.module';
     JobsModule,
     ScoresModule,
     UserAnswersModule,
+    RoleModule,
   ],
 })
 export class AppModule {}

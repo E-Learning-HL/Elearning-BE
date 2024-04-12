@@ -100,6 +100,14 @@ export class CoursesController {
 
   // @ApiBearerAuth('access-token')
   // @UseGuards(JwtAuthGuard)
+  @Get('get-course/:id')
+  async findCourse(@Param('id') id: number) {
+    const isActive = true;
+    return await this.coursesService.findCoursePublic(id, isActive);
+  }
+
+  // @ApiBearerAuth('access-token')
+  // @UseGuards(JwtAuthGuard)
   @Patch(':id')
   updateCourse(
     @Param('id') id: number,

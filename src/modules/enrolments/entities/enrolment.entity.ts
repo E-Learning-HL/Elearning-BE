@@ -7,13 +7,13 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 export class Enrolment extends BaseEntity {
   @ManyToOne(() => Course, (course) => course.enrolment)
   @JoinColumn({
-    name: 'courseId',
+    name: 'course_id',
   })
   course: Course;
 
   @ManyToOne(() => User, (user) => user.enrolment)
   @JoinColumn({
-    name: 'userId',
+    name: 'user_id',
   })
   user: User;
 
