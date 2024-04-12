@@ -105,52 +105,32 @@ export class EnrolmentsService {
         });
       }
 
-      const lessonsAndAssignments: Array<{
-        type: string;
-        order: number;
-        item: any;
-      }> = [];
-
-      course.course.section.forEach((section) => {
-        // Thêm các bài học vào mảng lessonsAndAssignments
-        lessonsAndAssignments.push(
-          ...section.lesson.map((lesson) => ({
-            type: 'lesson',
-            order: lesson.order,
-            item: lesson,
-          })),
-        );
-
-        // Thêm các bài tập có isActive = true vào mảng lessonsAndAssignments
-        const activeAssignments = section.assignment.filter(
-          (assignment) =>
-            assignment.isActive === true &&
-            assignment.assignmentType === ASSIGNINMENT_TYPE.EXERCISES,
-        );
-
-        // Thêm các bài tập vào mảng lessonsAndAssignments
-        lessonsAndAssignments.push(
-          ...activeAssignments.map((assignment) => ({
+      const sections = course.course.section.map((ListSection) => ({
+        ...ListSection,
+        contentSection: ListSection.lesson.map((lesson) => ({
+          type: 'lesson',
+          order: lesson.order,
+          item: lesson,
+        })).concat(
+          ListSection.assignment.map((assignment) => ({
             type: 'assignment',
             order: assignment.order,
             item: assignment,
-          })),
-        );
-      });
-
-      // Sắp xếp mảng lessonsAndAssignments theo biến order
-      lessonsAndAssignments.sort((a, b) => a.order - b.order);
-
-      // Đếm số lượng bài học
-      let lessonCount = 0;
-      course.course.section.forEach((section) => {
-        lessonCount += section.lesson.length;
+          })) as { type: string; order: number; item: any }[]
+        )
+      }));
+  
+      // Sắp xếp mảng sections theo trường order của các phần tử
+      sections.forEach(section => {
+        section.contentSection.sort((a, b) => a.order - b.order);
       });
 
       return {
         ...course,
-        lessonCount: lessonCount,
-        section: lessonsAndAssignments,
+        course: {
+          ...course.course,
+          section: sections,
+        },
       };
     } catch (e) {
       throw new HttpException(`Course is not found`, HttpStatus.NOT_FOUND);
