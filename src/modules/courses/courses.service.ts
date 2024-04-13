@@ -297,8 +297,8 @@ export class CoursesService {
     const courses = await this.courseRepository
       .createQueryBuilder('course')
       .leftJoinAndSelect('course.section', 'section')
-      .leftJoin('course.file', 'file')
-      .leftJoin('section.lesson', 'lesson')
+      .leftJoinAndSelect('course.file', 'file')
+      .leftJoinAndSelect('section.lesson', 'lesson')
       .where('course.start >= :startPoint', { startPoint })
       .andWhere('course.target <= :endPoint', { endPoint })
       .andWhere('course.isActive = :isActive', { isActive: true })
@@ -323,7 +323,7 @@ export class CoursesService {
       .addGroupBy('file.id')
       .orderBy('course.start', 'ASC')
       .addOrderBy('lesson.order', 'ASC')
-      .getRawMany();
+      .getMany();
 
     if (!courses) {
       throw new NotFoundException({
