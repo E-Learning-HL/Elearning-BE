@@ -49,6 +49,6 @@ export class User extends BaseEntity {
   @OneToMany(() => Score, (score) => score.user, { cascade: true })
   score: Score[];
 
-  @OneToMany(() => UserAnswer, (userAnser) => userAnser.user, { cascade: true })
-  userAnser: UserAnswer[];
+  @OneToMany(() => UserAnswer, (userAnswer) => userAnswer.user, { cascade: true })
+  userAnswer: UserAnswer[];
 }

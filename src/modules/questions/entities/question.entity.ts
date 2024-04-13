@@ -28,8 +28,8 @@ export class Question extends BaseEntity {
   @OneToMany(() => Answer, (answer) => answer.question, { cascade: true })
   answer: Answer[];
 
-  @OneToMany(() => UserAnswer, (userAnser) => userAnser.question, {
+  @OneToMany(() => UserAnswer, (userAnswer) => userAnswer.question, {
     cascade: true,
   })
-  userAnser: UserAnswer[];
+  userAnswer: UserAnswer[];
 }

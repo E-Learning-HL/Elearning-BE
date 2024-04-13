@@ -18,8 +18,8 @@ export class Answer extends BaseEntity {
   @JoinColumn({ name: 'question_id' })
   question: Question;
 
-  @OneToMany(() => UserAnswer, (userAnser) => userAnser.answer, {
+  @OneToMany(() => UserAnswer, (userAnswer) => userAnswer.answer, {
     cascade: true,
   })
-  userAnser: UserAnswer[];
+  userAnswer: UserAnswer[];
 }

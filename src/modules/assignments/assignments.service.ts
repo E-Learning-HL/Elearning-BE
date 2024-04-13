@@ -173,9 +173,9 @@ export class AssignmentsService {
     };
   }
 
-  async findAllCourse(courseId : number) : Promise<Assignment[]>{
+  async findAllCourse(courseId : number) : Promise<{ course: any, listAssignment: Assignment[] }>{
     try {
-      return await this.assignmentRepository.find({
+      const assignments = await this.assignmentRepository.find({
         where: { 
           course :{
             id : courseId,
@@ -184,13 +184,25 @@ export class AssignmentsService {
           assignmentType : ASSIGNINMENT_TYPE.TESTS,
         },
         relations: [
+          'course',
           'task',
           'task.question',
           'task.question.answer',
           'task.file',
         ],
-
       });
+      if (!assignments || assignments.length === 0) {
+        throw new HttpException('No assignments found for the course', HttpStatus.NOT_FOUND);
+      }
+
+      // Lấy thông tin của khóa học
+      const course = assignments[0].course;
+
+      // Trả về đối tượng chứa thông tin khóa học và danh sách bài tập
+      return {
+        course,
+        listAssignment: assignments,
+      };
     } catch (e) {
       throw new HttpException(
         "There's an error when get assignment by id",

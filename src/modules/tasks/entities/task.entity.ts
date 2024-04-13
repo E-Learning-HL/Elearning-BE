@@ -5,6 +5,7 @@ import { FileEntity } from 'src/modules/file/entities/file.entity';
 import { Question } from 'src/modules/questions/entities/question.entity';
 import { TASK_TYPE } from '../constants/task-type.enum';
 import { Score } from 'src/modules/scores/entities/score.entity';
+import { UserAnswer } from 'src/modules/user_answers/entities/user_answer.entity';
 
 @Entity('tasks')
 export class Task extends BaseEntity {
@@ -34,4 +35,9 @@ export class Task extends BaseEntity {
 
   @OneToMany(() => Score, (score) => score.task, { cascade: true })
   score: Score[];
+
+  @OneToMany(() => UserAnswer, (userAnswer) => userAnswer.task, {
+    cascade: true,
+  })
+  userAnswer: UserAnswer[];
 }
