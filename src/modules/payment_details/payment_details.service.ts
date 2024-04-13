@@ -55,7 +55,7 @@ export class PaymentDetailsService {
   async findCoursePayments(id: number): Promise<PaymentDetail[]> {
     const paymentDetailCourse = await this.paymentDetailRepository.find({
       where: {
-        payment: { id },
+        payment: { id: id },
       },
       relations: ['course'],
     });

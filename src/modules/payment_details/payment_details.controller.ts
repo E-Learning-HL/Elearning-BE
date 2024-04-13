@@ -72,14 +72,14 @@ export class PaymentDetailsController {
 
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updatePaymentDetailDto: UpdatePaymentDetailDto,
   ) {
-    return this.paymentDetailsService.update(+id, updatePaymentDetailDto);
+    return this.paymentDetailsService.update(id, updatePaymentDetailDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.paymentDetailsService.remove(+id);
+  remove(@Param('id') id: number) {
+    return this.paymentDetailsService.remove(id);
   }
 }

@@ -173,7 +173,7 @@ export class AssignmentsService {
     };
   }
 
-  async findAllCourse(courseId : number, assignmentType : ASSIGNINMENT_TYPE) : Promise<Assignment[]>{
+  async findAllCourse(courseId : number) : Promise<Assignment[]>{
     try {
       return await this.assignmentRepository.find({
         where: { 
@@ -181,7 +181,7 @@ export class AssignmentsService {
             id : courseId,
             isActive : true
           },
-          assignmentType : assignmentType,
+          assignmentType : ASSIGNINMENT_TYPE.TESTS,
         },
         relations: [
           'task',

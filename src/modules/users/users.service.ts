@@ -116,8 +116,9 @@ export class UsersService {
     }
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number): Promise<string> {
     await this.usersRepository.delete(id);
+    return 'User deleted successfully'; 
   }
 
   async updateUserStatus(id: number, isActive: boolean): Promise<User> {

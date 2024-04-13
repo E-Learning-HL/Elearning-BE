@@ -85,12 +85,11 @@ export class AssignmentsController {
 
   // @ApiBearerAuth('access-token')
   // @UseGuards(JwtAuthGuard)
-  @Get('get-exam/:assignmentType/:courseId')
+  @Get('get-exam/:courseId')
   findAllAssignmentByCourse(
     @Param('courseId') courseId: number,
-    @Param('assignmentType') assignmentType: ASSIGNINMENT_TYPE,
   ) {
-    return this.assignmentsService.findAllCourse(courseId, assignmentType);
+    return this.assignmentsService.findAllCourse(courseId);
   }
 
   // @ApiBearerAuth('access-token')
