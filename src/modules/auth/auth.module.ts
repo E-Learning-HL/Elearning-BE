@@ -8,6 +8,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './passport/jwt.strategy';
 import { AuthController } from './auth.controller';
 import { AuthConfig } from 'src/common/config/config.type';
+import { MailService } from 'src/common/mail/mail.service';
+import { MailModule } from 'src/common/mail/mail.module';
 
 @Module({
   providers: [AuthService, LocalStrategy, JwtStrategy],
@@ -16,6 +18,7 @@ import { AuthConfig } from 'src/common/config/config.type';
   imports: [
     UsersModule,
     PassportModule,
+    MailModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       // useFactory:  (configService: ConfigService) => ({

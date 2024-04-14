@@ -88,37 +88,43 @@ export class UsersService {
     return user;
   }
 
-  async updateUser(id: number, updateUserDto: UpdateUserDto) : Promise<User | undefined> {
+  async updateUser(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<User | undefined> {
     const user = await this.usersRepository.findOne({
-      where : {id : id}
-    })
+      where: { id: id },
+    });
 
-    if(!user){
+    if (!user) {
       throw new NotFoundException({
-        message : "User not found",
-        status : HttpStatus.NOT_FOUND
-      })
+        message: 'User not found',
+        status: HttpStatus.NOT_FOUND,
+      });
     }
-    user.name = updateUserDto.name
-    user.address = updateUserDto.address
-    user.phone = updateUserDto.phone
-    user.isActive = updateUserDto.isActive
-    
-    if(updateUserDto.password){
-      const password = await bcrypt.hash(updateUserDto.password, 10)
-      user.password = password
+    user.name = updateUserDto.name;
+    user.address = updateUserDto.address;
+    user.phone = updateUserDto.phone;
+    user.isActive = updateUserDto.isActive;
+
+    if (updateUserDto.password) {
+      const password = await bcrypt.hash(updateUserDto.password, 10);
+      user.password = password;
     }
 
     try {
-      return await this.usersRepository.save(user)
-    } catch (error){
-      throw new HttpException('Failed to save user', HttpStatus.INTERNAL_SERVER_ERROR);
+      return await this.usersRepository.save(user);
+    } catch (error) {
+      throw new HttpException(
+        'Failed to save user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   async remove(id: number): Promise<string> {
     await this.usersRepository.delete(id);
-    return 'User deleted successfully'; 
+    return 'User deleted successfully';
   }
 
   async updateUserStatus(id: number, isActive: boolean): Promise<User> {
@@ -134,9 +140,37 @@ export class UsersService {
     user.isActive = isActive;
 
     try {
-      return await this.usersRepository.save(user)
-    } catch (error){
-      throw new HttpException('Failed to save user', HttpStatus.INTERNAL_SERVER_ERROR);
+      return await this.usersRepository.save(user);
+    } catch (error) {
+      throw new HttpException(
+        'Failed to save user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateUserVerificationStatus(
+    userId: number,
+    isActive: boolean,
+    verificationCode: number,
+  ): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+    });
+    if (!user) {
+      throw new NotFoundException({
+        status: HttpStatus.NOT_FOUND,
+        message: 'User not found',
+      });
+    }
+    (user.isActive = isActive), (user.verificationCode = verificationCode);
+    try {
+      return await this.usersRepository.save(user);
+    } catch (error) {
+      throw new HttpException(
+        'Failed to save user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -167,9 +201,37 @@ export class UsersService {
     user.password = await bcrypt.hash(newPassword, 10);
 
     try {
-      return await this.usersRepository.save(user)
-    } catch (error){
-      throw new HttpException('Failed to save user', HttpStatus.INTERNAL_SERVER_ERROR);
+      return await this.usersRepository.save(user);
+    } catch (error) {
+      throw new HttpException(
+        'Failed to save user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
+  }
+
+  async resetPasswordUser(email: string, newPassword: string): Promise<any> {
+    const user = await this.usersRepository.findOne({
+      where: { email: email },
+    });
+
+    if (!user) {
+      throw new NotFoundException({
+        status: HttpStatus.NOT_FOUND,
+        message: 'User not found',
+      });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+
+    try {
+      await this.usersRepository.save(user);
+    } catch (error) {
+      throw new HttpException(
+        'Failed to save user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return { status: HttpStatus.OK, message: 'New password update successfully' };
   }
 }

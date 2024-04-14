@@ -40,6 +40,12 @@ export class User extends BaseEntity {
   })
   name: string;
 
+  @Column({
+    nullable : true,
+    name :'verification_code'
+  })
+  verificationCode : number
+
   @OneToMany(() => Enrolment, (enrolment) => enrolment.user, { cascade: true })
   enrolment: Enrolment[];
 

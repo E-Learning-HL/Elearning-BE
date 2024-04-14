@@ -8,4 +8,7 @@ export class MailData<T = never> {
   to: string;
   @ApiProperty()
   data: T;
+
+  @ApiProperty()
+  code : number
 }
