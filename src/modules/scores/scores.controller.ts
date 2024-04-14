@@ -27,9 +27,12 @@ export class ScoresController {
     return this.scoresService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.scoresService.findOne(+id);
+  @Get(':id/:taskId')
+  findOne(
+    @Param('id') id: number,
+    @Param('taskId') taskId: number
+) {
+    return this.scoresService.findOne(id, taskId);
   }
 
   @Patch(':id')

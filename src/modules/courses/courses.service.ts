@@ -293,46 +293,83 @@ export class CoursesService {
   async findCourseLevel(
     startPoint: number,
     endPoint: number,
-  ): Promise<Course[]> {
+  ): Promise<any[]> {
     const courses = await this.courseRepository
-      .createQueryBuilder('course')
-      .leftJoinAndSelect('course.section', 'section')
-      .leftJoinAndSelect('course.file', 'file')
-      .leftJoinAndSelect('section.lesson', 'lesson')
-      .where('course.start >= :startPoint', { startPoint })
-      .andWhere('course.target <= :endPoint', { endPoint })
-      .andWhere('course.isActive = :isActive', { isActive: true })
-      .select([
-        'course.id',
-        'course.nameCourse',
-        'course.price',
-        'course.introduce',
-        'course.listening',
-        'course.speaking',
-        'course.reading',
-        'course.writing',
-        'course.start',
-        'course.target',
-        'course.isActive',
-        'COUNT(lesson.id) As countLesson', // Đếm số lượng bài học trong mỗi khóa học
-        'file.url AS url',
-        'file.name AS nameUrl',
-      ])
-      .groupBy('course.id')
-      .addGroupBy('lesson.order')
-      .addGroupBy('file.id')
-      .orderBy('course.start', 'ASC')
-      .addOrderBy('lesson.order', 'ASC')
-      .getMany();
+      // .createQueryBuilder('course')
+      // .leftJoinAndSelect('course.section', 'section')
+      // .leftJoinAndSelect('course.file', 'file')
+      // .leftJoinAndSelect('section.lesson', 'lesson')
+      // .where('course.start >= :startPoint', { startPoint })
+      // .andWhere('course.target <= :endPoint', { endPoint })
+      // .andWhere('course.isActive = :isActive', { isActive: true })
+      // .select([
+      //   'course.id',
+      //   'course.nameCourse',
+      //   'course.price',
+      //   'course.introduce',
+      //   'course.listening',
+      //   'course.speaking',
+      //   'course.reading',
+      //   'course.writing',
+      //   'course.start',
+      //   'course.target',
+      //   'course.isActive',
+      //   'COUNT(lesson.id) As countLesson', // Đếm số lượng bài học trong mỗi khóa học
+      //   'file.url AS url',
+      //   'file.name AS nameUrl',
+      // ])
+      // .groupBy('course.id')
+      // .addGroupBy('lesson.order')
+      // .addGroupBy('file.id')
+      // .orderBy('course.start', 'ASC')
+      // .addOrderBy('lesson.order', 'ASC')
+      // .getRawMany();
 
-    if (!courses) {
-      throw new NotFoundException({
-        message: 'Courses not found',
-        status: HttpStatus.NOT_FOUND,
-      });
-    }
+    // if (!courses) {
+    //   throw new NotFoundException({
+    //     message: 'Courses not found',
+    //     status: HttpStatus.NOT_FOUND,
+    //   });
+    // }
 
-    return courses;
+    // return courses;
+    .createQueryBuilder('course')
+    .leftJoinAndSelect('course.section', 'section')
+    .leftJoinAndSelect('course.file', 'file')
+    .leftJoinAndSelect('section.lesson', 'lesson')
+    .where('course.start >= :startPoint', { startPoint })
+    .andWhere('course.target <= :endPoint', { endPoint })
+    .andWhere('course.isActive = :isActive', { isActive: true })
+    .orderBy('course.start', 'ASC')
+    .addOrderBy('lesson.order', 'ASC')
+    .getMany();
+
+  if (!courses) {
+    throw new NotFoundException({
+      message: 'Courses not found',
+      status: HttpStatus.NOT_FOUND,
+    });
+  }
+
+  // Chuyển đổi dữ liệu trả về thành định dạng mong muốn
+  const formattedCourses = courses.map(course => ({
+    course_id: course.id,
+    course_name_course: course.nameCourse,
+    course_price: course.price,
+    course_introduce: course.introduce,
+    course_listening: course.listening,
+    course_speaking: course.speaking,
+    course_reading: course.reading,
+    course_writing: course.writing,
+    course_start: course.start,
+    course_target: course.target,
+    course_is_active: course.isActive,
+    countlesson: course.section.reduce((total, section) => total + section.lesson.length, 0),
+    url: course.file[0]?.url || '', // Nếu có file, lấy URL, ngược lại trả về rỗng
+    nameurl: course.file[0]?.name || '', // Nếu có file, lấy tên, ngược lại trả về rỗng
+  }));
+
+  return formattedCourses;
   }
 
   async update(id: number, updateCourseDto: UpdateCourseDto): Promise<any> {

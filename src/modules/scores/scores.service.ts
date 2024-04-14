@@ -1,19 +1,42 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateScoreDto } from './dto/create-score.dto';
 import { UpdateScoreDto } from './dto/update-score.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Score } from './entities/score.entity';
 
 @Injectable()
 export class ScoresService {
+  constructor(
+    @InjectRepository(Score)
+    private scoreRepository: Repository<Score>
+  ) {}
   create(createScoreDto: CreateScoreDto) {
     return 'This action adds a new score';
   }
 
-  findAll() {
-    return `This action returns all scores`;
+  async findAll() {
+    try {
+      return await this.scoreRepository.find({
+        relations : ['task', 'user']
+      })
+    } catch (error){
+      throw new HttpException('Not found score', HttpStatus.NOT_FOUND);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} score`;
+  async findOne(id: number, taskId : number) {
+    try {
+      return await this.scoreRepository.findOne({
+        where: {
+          id : id,
+          task : {id : taskId}
+        },
+        relations : ['task']
+      })
+    } catch (error){
+      throw new HttpException('Not found score', HttpStatus.NOT_FOUND);
+    }
   }
 
   update(id: number, updateScoreDto: UpdateScoreDto) {
