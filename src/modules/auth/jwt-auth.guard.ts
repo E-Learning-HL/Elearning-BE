@@ -17,10 +17,19 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (isPublic) {
       return true;
     }
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
+    console.log("user", user)
+  
+    // Kiểm tra xem user có tồn tại không
+    // if (!user) {
+    //   throw new UnauthorizedException('User is not authenticated');
+    // }
     return super.canActivate(context);
   }
 
   handleRequest(err, user, info) {
+    console.log("User in handleRequest:", user);
     // You can throw an exception based on either "info" or "err" arguments
     if (err || !user) {
       throw err || new UnauthorizedException("Thông báo lỗi", "http request error");

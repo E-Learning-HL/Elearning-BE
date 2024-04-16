@@ -12,10 +12,12 @@ import { SectionsModule } from '../sections/sections.module';
 import { FileService } from '../file/file.service';
 import { LessonsService } from '../lessons/lessons.service';
 import { SectionsService } from '../sections/sections.service';
+import { RoleGuard } from '../role/guards/role.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Module({
   controllers: [CoursesController],
-  providers: [CoursesService, FileService, LessonsService, SectionsService],
+  providers: [CoursesService, FileService, LessonsService, SectionsService,JwtAuthGuard, RoleGuard],
   exports: [CoursesService],
   imports: [
     TypeOrmModule.forFeature([Course, Section, Lesson, FileEntity]),

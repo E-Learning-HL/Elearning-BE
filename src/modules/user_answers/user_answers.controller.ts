@@ -29,22 +29,23 @@ export class UserAnswersController {
     return this.userAnswersService.create(req.user.id,createUserAnswerDto);
   }
 
-  @Get()
-  findAll() {
-    return this.userAnswersService.findAll();
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard)
+  @Get('get-history-answer/:taskId')
+  getHistoryAnswer(
+    @Req() req,
+    @Param('taskId') taskId: number) {
+    return this.userAnswersService.getUserAnswer(req.user.id, taskId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userAnswersService.findOne(+id);
-  }
-
-  @Patch(':id')
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard)
+  @Patch('redo-test')
   update(
-    @Param('id') id: string,
+    @Req() req,
     @Body() updateUserAnswerDto: UpdateUserAnswerDto,
   ) {
-    return this.userAnswersService.update(+id, updateUserAnswerDto);
+    return this.userAnswersService.updateUserAnswer(req.user.id, updateUserAnswerDto);
   }
 
   @Delete(':id')

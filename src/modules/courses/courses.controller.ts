@@ -22,14 +22,18 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Course } from './entities/course.entity';
 import { Section } from '../sections/entities/section.entity';
+import { Roles } from '../role/role.decorator';
+import { Role } from '../role/constants/role.enum';
+import { RoleGuard } from '../role/guards/role.guard';
 
 @ApiTags('Courses')
 @Controller('courses')
 export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
-  // @ApiBearerAuth('access-token')
-  // @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @Post('create-courses')
   async create(@Body() createCourseDto: CreateCourseDto) {
     const courses = await this.coursesService.create(createCourseDto);
@@ -83,10 +87,12 @@ export class CoursesController {
     return this.coursesService.findCourseLevel(startPoint, endPoint);
   }
 
-  // @ApiBearerAuth('access-token')
-  // @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @UseGuards( JwtAuthGuard)
   @Get(':id')
-  async findOne(@Param('id') id: number) {
+  async findOne(@Param('id') id: number, @Req() request) {
+    console.log("request.user", request.user)
     return await this.coursesService.findOne(id);
   }
 
@@ -98,8 +104,8 @@ export class CoursesController {
     return await this.coursesService.findCoursePublic(id, isActive);
   }
 
-  // @ApiBearerAuth('access-token')
-  // @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard)
   @Get('get-course/:id')
   async findCourse(@Param('id') id: number) {
     const isActive = true;

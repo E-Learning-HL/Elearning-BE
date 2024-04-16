@@ -31,7 +31,7 @@ class Question {
 }
 export class CreateUserAnswerDto {
   @ApiProperty()
-  @IsOptional()
+  // @IsOptional()
   @IsNumber()
   taskId: number;
 

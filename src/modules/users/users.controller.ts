@@ -26,6 +26,8 @@ import { ChangePassDTO } from './dto/change-password.dto';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcryptjs';
 import { UpdateStatusUserDto } from './dto/update-status-user.dto';
+import { Roles } from '../role/role.decorator';
+import { Role } from '../role/constants/role.enum';
 
 @ApiTags('Users')
 @Controller('users')

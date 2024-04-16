@@ -2,6 +2,7 @@ import { Exclude } from 'class-transformer';
 import { BaseEntity } from 'src/database/base/base.entity';
 import { Enrolment } from 'src/modules/enrolments/entities/enrolment.entity';
 import { Payment } from 'src/modules/payments/entities/payment.entity';
+import { Role } from 'src/modules/role/constants/role.enum';
 import { Score } from 'src/modules/scores/entities/score.entity';
 import { UserAnswer } from 'src/modules/user_answers/entities/user_answer.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
@@ -39,6 +40,13 @@ export class User extends BaseEntity {
     nullable: true,
   })
   name: string;
+
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.USER, // Set default role
+  })
+  role: Role;
 
   @Column({
     nullable : true,
