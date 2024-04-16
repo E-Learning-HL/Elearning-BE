@@ -2,7 +2,7 @@ import { Exclude } from 'class-transformer';
 import { BaseEntity } from 'src/database/base/base.entity';
 import { Enrolment } from 'src/modules/enrolments/entities/enrolment.entity';
 import { Payment } from 'src/modules/payments/entities/payment.entity';
-import { Role } from 'src/modules/role/constants/role.enum';
+import { Role } from 'src/modules/roles/constants/role.enum';
 import { Score } from 'src/modules/scores/entities/score.entity';
 import { UserAnswer } from 'src/modules/user_answers/entities/user_answer.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
@@ -22,7 +22,7 @@ export class User extends BaseEntity {
   @Column({
     nullable: true,
     default: true,
-    name :'is_active'
+    name: 'is_active',
   })
   isActive: boolean;
 
@@ -49,10 +49,10 @@ export class User extends BaseEntity {
   role: Role;
 
   @Column({
-    nullable : true,
-    name :'verification_code'
+    nullable: true,
+    name: 'verification_code',
   })
-  verificationCode : number
+  verificationCode: number;
 
   @OneToMany(() => Enrolment, (enrolment) => enrolment.user, { cascade: true })
   enrolment: Enrolment[];
@@ -63,6 +63,8 @@ export class User extends BaseEntity {
   @OneToMany(() => Score, (score) => score.user, { cascade: true })
   score: Score[];
 
-  @OneToMany(() => UserAnswer, (userAnswer) => userAnswer.user, { cascade: true })
+  @OneToMany(() => UserAnswer, (userAnswer) => userAnswer.user, {
+    cascade: true,
+  })
   userAnswer: UserAnswer[];
 }

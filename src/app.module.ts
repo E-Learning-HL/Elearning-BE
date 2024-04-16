@@ -55,7 +55,8 @@ import { PaymentDetailsModule } from './modules/payment_details/payment_details.
 import { JobsModule } from './jobs/jobs.module';
 import { ScoresModule } from './modules/scores/scores.module';
 import { UserAnswersModule } from './modules/user_answers/user_answers.module';
-import { RoleModule } from './modules/role/role.module';
+import { RoleModule } from './modules/roles/role.module';
+import { PermissionsModule } from './modules/permissions/permissions.module';
 
 @Module({
   imports: [
@@ -139,6 +140,7 @@ import { RoleModule } from './modules/role/role.module';
     ScoresModule,
     UserAnswersModule,
     RoleModule,
+    PermissionsModule,
   ],
 })
 export class AppModule {}

@@ -26,16 +26,22 @@ import { ChangePassDTO } from './dto/change-password.dto';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcryptjs';
 import { UpdateStatusUserDto } from './dto/update-status-user.dto';
-import { Roles } from '../role/role.decorator';
-import { Role } from '../role/constants/role.enum';
+import { Roles } from '../roles/role.decorator';
+import { Role } from '../roles/constants/role.enum';
+import { Permission } from '../permissions/constants/permission.enum';
+import { Permissions } from '../permissions/permission.decorator';
+import { RoleGuard } from '../roles/guards/role.guard';
+import { PermissionGuard } from '../permissions/guards/permission.guard';
 
 @ApiTags('Users')
 @Controller('users')
+@ApiBearerAuth('access-token')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @ApiBearerAuth('access-token')
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN)
+  @Permissions(Permission.CREATE)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Post('create-user')
   async create(@Body() createUserDto: CreateUserDto) {
     const existingUser = await this.usersService.findOneByEmail(
@@ -65,8 +71,9 @@ export class UsersController {
     }
   }
 
-  @ApiBearerAuth('access-token')
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @ApiQuery({ name: 'page', required: false, type: String })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -103,15 +110,17 @@ export class UsersController {
     }
   }
 
-  @ApiBearerAuth('access-token')
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.usersService.findById(id);
   }
 
-  @ApiBearerAuth('access-token')
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN)
+  @Permissions(Permission.UPDATE)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Put(':id')
   async updateUser(
     @Param('id') id: number,
@@ -131,15 +140,17 @@ export class UsersController {
     }
   }
 
-  // @UseGuards(JwtAuthGuard)
-  // @ApiBearerAuth('access-token')
+  @Roles(Role.SUPER_ADMIN)
+  @Permissions(Permission.DELETE)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Delete(':id')
   remove(@Param('id') id: number) {
     return this.usersService.remove(id);
   }
 
-  @ApiBearerAuth('access-token')
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN)
+  @Permissions(Permission.UPDATE)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Patch('status/:id')
   async activateUser(
     @Param('id', ParseIntPipe) id: number,
@@ -158,8 +169,9 @@ export class UsersController {
     };
   }
 
-  @ApiBearerAuth('access-token')
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.USER)
+  @Permissions(Permission.UPDATE)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Patch('change-password')
   async changePassword(@Req() req, @Body() changePassDto: ChangePassDTO) {
     const { oldPassword, newPassword } = changePassDto;

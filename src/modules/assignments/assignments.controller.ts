@@ -22,25 +22,33 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Course } from '../courses/entities/course.entity';
 import { Assignment } from './entities/assignment.entity';
 import { ASSIGNINMENT_TYPE } from './constants/assignment-type.enum';
+import { Permissions } from '../permissions/permission.decorator';
+import { PermissionGuard } from '../permissions/guards/permission.guard';
+import { Role } from '../roles/constants/role.enum';
+import { RoleGuard } from '../roles/guards/role.guard';
+import { Roles } from '../roles/role.decorator';
+import { Permission } from '../permissions/constants/permission.enum';
 
 @ApiTags('Assignments')
 @Controller('assignments')
+@ApiBearerAuth('access-token')
 export class AssignmentsController {
   constructor(private readonly assignmentsService: AssignmentsService) {}
 
-  // @ApiBearerAuth('access-token')
-  // @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  @Permissions(Permission.CREATE)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Post('create-assignment')
   async create(@Body() createAssignmentDto: CreateAssignmentDto) {
-    // console.log('createAssignmentDto', createAssignmentDto);
     const assignments = await this.assignmentsService.create(
       createAssignmentDto,
     );
     return assignments;
   }
 
-  // @ApiBearerAuth('access-token')
-  // @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @ApiQuery({ name: 'page', required: false, type: String })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -76,15 +84,17 @@ export class AssignmentsController {
     }
   }
 
-  // @ApiBearerAuth('access-token')
-  // @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.assignmentsService.findOne(id);
   }
 
-  // @ApiBearerAuth('access-token')
-  // @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get('get-exam/:courseId')
   findAllAssignmentByCourse(
     @Param('courseId') courseId: number,
@@ -92,8 +102,9 @@ export class AssignmentsController {
     return this.assignmentsService.findAllCourse(courseId);
   }
 
-  // @ApiBearerAuth('access-token')
-  // @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  @Permissions(Permission.UPDATE)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Patch(':id')
   update(
     @Param('id') id: number,
@@ -102,8 +113,9 @@ export class AssignmentsController {
     return this.assignmentsService.update(id, updateAssignmentDto);
   }
 
-  // @ApiBearerAuth('access-token')
-  // @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  @Permissions(Permission.DELETE)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Delete(':id')
   async remove(@Param('id') id: number): Promise<{ message: string }> {
     const result = await this.assignmentsService.remove(id);

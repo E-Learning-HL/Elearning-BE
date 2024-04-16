@@ -23,21 +23,30 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Payment } from './entities/payment.entity';
 import { UpdateStatusPaymentDto } from './dto/update-status-payment.dto';
+import { Roles } from '../roles/role.decorator';
+import { Permissions } from '../permissions/permission.decorator';
+import { RoleGuard } from '../roles/guards/role.guard';
+import { PermissionGuard } from '../permissions/guards/permission.guard';
+import { Role } from '../roles/constants/role.enum';
+import { Permission } from '../permissions/constants/permission.enum';
 
 @ApiTags('Payments')
 @Controller('payments')
+@ApiBearerAuth('access-token')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
-  @ApiBearerAuth('access-token')
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN, Role.USER)
+  @Permissions(Permission.CREATE)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Post('create-payment')
   async create(@Req() req, @Body() createPaymentDto: CreatePaymentDto) {
     return await this.paymentsService.create(req.user.id, createPaymentDto);
   }
 
-  // @ApiBearerAuth('access-token')
-  // @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN, Role.USER)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @ApiQuery({ name: 'page', required: false, type: String })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -83,8 +92,9 @@ export class PaymentsController {
     return this.paymentsService.findById(id);
   }
 
-  // @ApiBearerAuth('access-token')
-  // @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN)
+  @Permissions(Permission.UPDATE)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Patch('update-payment/:id')
   update(
     @Param('id') id: number,

@@ -22,26 +22,31 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Course } from './entities/course.entity';
 import { Section } from '../sections/entities/section.entity';
-import { Roles } from '../role/role.decorator';
-import { Role } from '../role/constants/role.enum';
-import { RoleGuard } from '../role/guards/role.guard';
+import { Roles } from '../roles/role.decorator';
+import { Role } from '../roles/constants/role.enum';
+import { RoleGuard } from '../roles/guards/role.guard';
+import { PermissionGuard } from '../permissions/guards/permission.guard';
+import { Permissions } from '../permissions/permission.decorator';
+import { Permission } from '../permissions/constants/permission.enum';
 
 @ApiTags('Courses')
 @Controller('courses')
+@ApiBearerAuth('access-token')
 export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
-  @ApiBearerAuth('access-token')
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
-  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Permissions(Permission.CREATE)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Post('create-courses')
   async create(@Body() createCourseDto: CreateCourseDto) {
     const courses = await this.coursesService.create(createCourseDto);
     return courses;
   }
 
-  // @ApiBearerAuth('access-token')
-  // @UseGuards(JwtAuthGuard)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @ApiQuery({ name: 'page', required: false, type: String })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -77,8 +82,7 @@ export class CoursesController {
     }
   }
 
-  // @ApiBearerAuth('access-token')
-  // @UseGuards(JwtAuthGuard)
+
   @Get('course-level')
   getCourseLevel(
     @Query('startPoint') startPoint: number,
@@ -87,33 +91,35 @@ export class CoursesController {
     return this.coursesService.findCourseLevel(startPoint, endPoint);
   }
 
-  @ApiBearerAuth('access-token')
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
-  @UseGuards( JwtAuthGuard)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get(':id')
   async findOne(@Param('id') id: number, @Req() request) {
-    console.log("request.user", request.user)
+    console.log('request.user', request.user);
     return await this.coursesService.findOne(id);
   }
 
-  // @ApiBearerAuth('access-token')
-  // @UseGuards(JwtAuthGuard)
+  // @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  // @Permissions(Permission.READ)
+  // @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get('get-course-public/:id')
   async findCoursePublic(@Param('id') id: number) {
     const isActive = true;
     return await this.coursesService.findCoursePublic(id, isActive);
   }
 
-  @ApiBearerAuth('access-token')
-  @UseGuards(JwtAuthGuard)
+
+  
   @Get('get-course/:id')
   async findCourse(@Param('id') id: number) {
     const isActive = true;
     return await this.coursesService.findCoursePublic(id, isActive);
   }
 
-  // @ApiBearerAuth('access-token')
-  // @UseGuards(JwtAuthGuard)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @Permissions(Permission.UPDATE)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Patch(':id')
   updateCourse(
     @Param('id') id: number,
@@ -122,8 +128,10 @@ export class CoursesController {
     return this.coursesService.update(id, updateCourseDto);
   }
 
-  // @ApiBearerAuth('access-token')
-  // @UseGuards(JwtAuthGuard)
+
+  @Roles(Role.SUPER_ADMIN)
+  @Permissions(Permission.DELETE)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Delete(':id')
   async remove(@Param('id') id: number): Promise<{ message: string }> {
     const result = await this.coursesService.deleteCourseById(id);

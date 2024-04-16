@@ -10,7 +10,7 @@ import { AuthController } from './auth.controller';
 import { AuthConfig } from 'src/common/config/config.type';
 import { MailService } from 'src/common/mail/mail.service';
 import { MailModule } from 'src/common/mail/mail.module';
-import { RoleGuard } from '../role/guards/role.guard';
+import { RoleGuard } from '../roles/guards/role.guard';
 
 @Module({
   providers: [AuthService, LocalStrategy, JwtStrategy, RoleGuard],

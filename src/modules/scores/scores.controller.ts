@@ -6,14 +6,23 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ScoresService } from './scores.service';
 import { CreateScoreDto } from './dto/create-score.dto';
 import { UpdateScoreDto } from './dto/update-score.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Roles } from '../roles/role.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RoleGuard } from '../roles/guards/role.guard';
+import { PermissionGuard } from '../permissions/guards/permission.guard';
+import { Role } from '../roles/constants/role.enum';
+import { Permissions } from '../permissions/permission.decorator';
+import { Permission } from '../permissions/constants/permission.enum';
 
 @ApiTags('Scores')
 @Controller('scores')
+@ApiBearerAuth('access-token')
 export class ScoresController {
   constructor(private readonly scoresService: ScoresService) {}
 
@@ -27,6 +36,9 @@ export class ScoresController {
     return this.scoresService.findAll();
   }
 
+  @Roles(Role.USER, Role.SUPER_ADMIN)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get(':id/:taskId')
   findOne(
     @Param('id') id: number,

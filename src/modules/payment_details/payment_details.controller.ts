@@ -11,15 +11,24 @@ import {
   HttpStatus,
   ParseIntPipe,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { PaymentDetailsService } from './payment_details.service';
 import { CreatePaymentDetailDto } from './dto/create-payment_detail.dto';
 import { UpdatePaymentDetailDto } from './dto/update-payment_detail.dto';
 import { PaymentDetail } from './entities/payment_detail.entity';
-import { ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Permissions } from '../permissions/permission.decorator';
+import { Roles } from '../roles/role.decorator';
+import { Permission } from '../permissions/constants/permission.enum';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RoleGuard } from '../roles/guards/role.guard';
+import { PermissionGuard } from '../permissions/guards/permission.guard';
+import { Role } from '../roles/constants/role.enum';
 
 @ApiTags('Payment Details')
 @Controller('payment-details')
+@ApiBearerAuth('access-token')
 export class PaymentDetailsController {
   constructor(private readonly paymentDetailsService: PaymentDetailsService) {}
 
@@ -28,8 +37,9 @@ export class PaymentDetailsController {
     return this.paymentDetailsService.create(createPaymentDetailDto);
   }
 
-  // @ApiBearerAuth('access-token')
-  // @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @ApiQuery({ name: 'page', required: false, type: String })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -65,6 +75,9 @@ export class PaymentDetailsController {
     }
   }
 
+  @Roles(Role.SUPER_ADMIN, Role.USER)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get('coures/:id')
   findAllCourse(@Param('id') id: number) {
     return this.paymentDetailsService.findCoursePayments(id);

@@ -10,7 +10,6 @@ import { Answer } from 'src/modules/answers/entities/answer.entity';
 import { User } from '../users/entities/user.entity';
 import { Question } from '../questions/entities/question.entity';
 import { Task } from '../tasks/entities/task.entity';
-import { unsubscribe } from 'node:diagnostics_channel';
 
 @Injectable()
 export class UserAnswersService {

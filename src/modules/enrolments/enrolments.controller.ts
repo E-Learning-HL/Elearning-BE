@@ -20,9 +20,16 @@ import { UpdateEnrolmentDto } from './dto/update-enrolment.dto';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Enrolment } from './entities/enrolment.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from '../roles/role.decorator';
+import { Permissions } from '../permissions/permission.decorator';
+import { Permission } from '../permissions/constants/permission.enum';
+import { Role } from '../roles/constants/role.enum';
+import { RoleGuard } from '../roles/guards/role.guard';
+import { PermissionGuard } from '../permissions/guards/permission.guard';
 
 @ApiTags('Enrolments')
 @Controller('enrolments')
+@ApiBearerAuth('access-token')
 export class EnrolmentsController {
   constructor(private readonly enrolmentsService: EnrolmentsService) {}
 
@@ -31,8 +38,9 @@ export class EnrolmentsController {
     return this.enrolmentsService.create(createEnrolmentDto);
   }
 
-  // @ApiBearerAuth('access-token')
-  // @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @ApiQuery({ name: 'page', required: false, type: String })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -68,15 +76,17 @@ export class EnrolmentsController {
     }
   }
 
-  @ApiBearerAuth('access-token')
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN, Role.USER)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get()
   find(@Req() req) {
     return this.enrolmentsService.findCourse(req.user.id);
   }
 
-  @ApiBearerAuth('access-token')
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN, Role.USER)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get('course/:courseId')
   findByCourse(
     @Req() req,
@@ -85,8 +95,9 @@ export class EnrolmentsController {
     return this.enrolmentsService.findOneCourse(req.user.id, courseId);
   }
 
-  // @ApiBearerAuth('access-token')
-  // @UseGuards(JwtAuthGuard)
+  @Roles(Role.SUPER_ADMIN)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Patch(':id')
   update(
     @Param('id') id: number,

@@ -14,14 +14,22 @@ import { CreateUserAnswerDto } from './dto/create-user_answer.dto';
 import { UpdateUserAnswerDto } from './dto/update-user_answer.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from '../roles/role.decorator';
+import { Permissions } from '../permissions/permission.decorator';
+import { RoleGuard } from '../roles/guards/role.guard';
+import { PermissionGuard } from '../permissions/guards/permission.guard';
+import { Role } from '../roles/constants/role.enum';
+import { Permission } from '../permissions/constants/permission.enum';
 
 @ApiTags('User Answers')
 @Controller('user-answers')
+@ApiBearerAuth('access-token')
 export class UserAnswersController {
   constructor(private readonly userAnswersService: UserAnswersService) {}
 
-  @ApiBearerAuth('access-token')
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.USER, Role.SUPER_ADMIN)
+  @Permissions(Permission.CREATE)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Post()
   create(
     @Req() req,
@@ -29,8 +37,9 @@ export class UserAnswersController {
     return this.userAnswersService.create(req.user.id,createUserAnswerDto);
   }
 
-  @ApiBearerAuth('access-token')
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.USER, Role.SUPER_ADMIN)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get('get-history-answer/:taskId')
   getHistoryAnswer(
     @Req() req,
@@ -38,8 +47,9 @@ export class UserAnswersController {
     return this.userAnswersService.getUserAnswer(req.user.id, taskId);
   }
 
-  @ApiBearerAuth('access-token')
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.USER, Role.SUPER_ADMIN)
+  @Permissions(Permission.UPDATE)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Patch('redo-test')
   update(
     @Req() req,
