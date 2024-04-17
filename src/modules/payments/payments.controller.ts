@@ -36,7 +36,7 @@ import { Permission } from '../permissions/constants/permission.enum';
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
-  @Roles(Role.SUPER_ADMIN, Role.USER)
+  @Roles(Role.SUPER_ADMIN, Role.USER, Role.ADMIN)
   @Permissions(Permission.CREATE)
   @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Post('create-payment')
@@ -44,7 +44,7 @@ export class PaymentsController {
     return await this.paymentsService.create(req.user.id, createPaymentDto);
   }
 
-  @Roles(Role.SUPER_ADMIN, Role.USER)
+  @Roles(Role.SUPER_ADMIN, Role.USER, Role.ADMIN)
   @Permissions(Permission.READ)
   @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @ApiQuery({ name: 'page', required: false, type: String })
@@ -92,7 +92,7 @@ export class PaymentsController {
     return this.paymentsService.findById(id);
   }
 
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.USER, Role.ADMIN)
   @Permissions(Permission.UPDATE)
   @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Patch('update-payment/:id')

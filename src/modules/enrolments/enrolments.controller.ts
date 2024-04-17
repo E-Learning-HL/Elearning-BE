@@ -76,7 +76,7 @@ export class EnrolmentsController {
     }
   }
 
-  @Roles(Role.SUPER_ADMIN, Role.USER)
+  @Roles(Role.SUPER_ADMIN, Role.USER, Role.ADMIN)
   @Permissions(Permission.READ)
   @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get()
@@ -84,7 +84,7 @@ export class EnrolmentsController {
     return this.enrolmentsService.findCourse(req.user.id);
   }
 
-  @Roles(Role.SUPER_ADMIN, Role.USER)
+  @Roles(Role.SUPER_ADMIN, Role.USER, Role.ADMIN)
   @Permissions(Permission.READ)
   @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get('course/:courseId')
