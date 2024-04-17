@@ -31,10 +31,10 @@ import { Permission } from '../permissions/constants/permission.enum';
 
 @ApiTags('Courses')
 @Controller('courses')
-@ApiBearerAuth('access-token')
 export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
+  @ApiBearerAuth('access-token')
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @Permissions(Permission.CREATE)
   @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
@@ -43,7 +43,7 @@ export class CoursesController {
     const courses = await this.coursesService.create(createCourseDto);
     return courses;
   }
-
+  @ApiBearerAuth('access-token')
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @Permissions(Permission.READ)
   @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
@@ -82,7 +82,6 @@ export class CoursesController {
     }
   }
 
-
   @Get('course-level')
   getCourseLevel(
     @Query('startPoint') startPoint: number,
@@ -91,6 +90,7 @@ export class CoursesController {
     return this.coursesService.findCourseLevel(startPoint, endPoint);
   }
 
+  @ApiBearerAuth('access-token')
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @Permissions(Permission.READ)
   @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
@@ -100,6 +100,7 @@ export class CoursesController {
     return await this.coursesService.findOne(id);
   }
 
+  @ApiBearerAuth('access-token')
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @Permissions(Permission.READ)
   @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
@@ -109,14 +110,13 @@ export class CoursesController {
     return await this.coursesService.findCoursePublic(id, isActive);
   }
 
-
-  
   @Get('get-course/:id')
   async findCourse(@Param('id') id: number) {
     const isActive = true;
     return await this.coursesService.findCoursePublic(id, isActive);
   }
 
+  @ApiBearerAuth('access-token')
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @Permissions(Permission.UPDATE)
   @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
@@ -128,7 +128,7 @@ export class CoursesController {
     return this.coursesService.update(id, updateCourseDto);
   }
 
-
+  @ApiBearerAuth('access-token')
   @Roles(Role.SUPER_ADMIN)
   @Permissions(Permission.DELETE)
   @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
