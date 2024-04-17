@@ -15,6 +15,10 @@ import { SectionsService } from '../sections/sections.service';
 import { RoleGuard } from '../roles/guards/role.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PermissionGuard } from '../permissions/guards/permission.guard';
+import { Assignment } from '../assignments/entities/assignment.entity';
+import { Task } from '../tasks/entities/task.entity';
+import { Answer } from '../answers/entities/answer.entity';
+import { Question } from '../questions/entities/question.entity';
 
 @Module({
   controllers: [CoursesController],
@@ -29,7 +33,7 @@ import { PermissionGuard } from '../permissions/guards/permission.guard';
   ],
   exports: [CoursesService],
   imports: [
-    TypeOrmModule.forFeature([Course, Section, Lesson, FileEntity]),
+    TypeOrmModule.forFeature([Course, Section, Lesson, FileEntity, Task, Assignment, Answer, Question]),
     FileModule,
     LessonsModule,
     SectionsModule,

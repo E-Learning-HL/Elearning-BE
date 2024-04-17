@@ -35,9 +35,9 @@ import { Permission } from '../permissions/constants/permission.enum';
 export class AssignmentsController {
   constructor(private readonly assignmentsService: AssignmentsService) {}
 
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
-  @Permissions(Permission.CREATE)
-  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
+  // @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  // @Permissions(Permission.CREATE)
+  // @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Post('create-assignment')
   async create(@Body() createAssignmentDto: CreateAssignmentDto) {
     const assignments = await this.assignmentsService.create(
@@ -46,9 +46,9 @@ export class AssignmentsController {
     return assignments;
   }
 
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
-  @Permissions(Permission.READ)
-  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
+  // @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  // @Permissions(Permission.READ)
+  // @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @ApiQuery({ name: 'page', required: false, type: String })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -84,17 +84,17 @@ export class AssignmentsController {
     }
   }
 
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
-  @Permissions(Permission.READ)
-  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
+  // @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  // @Permissions(Permission.READ)
+  // @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.assignmentsService.findOne(id);
   }
 
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
-  @Permissions(Permission.READ)
-  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
+  // @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  // @Permissions(Permission.READ)
+  // @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get('get-exam/:courseId')
   findAllAssignmentByCourse(
     @Param('courseId') courseId: number,
@@ -102,9 +102,9 @@ export class AssignmentsController {
     return this.assignmentsService.findAllCourse(courseId);
   }
 
-  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
-  @Permissions(Permission.UPDATE)
-  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
+  // @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  // @Permissions(Permission.UPDATE)
+  // @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Patch(':id')
   update(
     @Param('id') id: number,

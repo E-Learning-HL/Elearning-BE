@@ -76,13 +76,19 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @ApiQuery({ name: 'page', required: false, type: String })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'search', required: false, type: String })
+  // @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'email', required: false, type: String })
+  @ApiQuery({ name: 'name', required: false, type: String })
+  @ApiQuery({ name: 'role', required: false, type: String })
   @ApiQuery({ name: 'sort', required: false, type: String })
   @Get('/list')
   async getList(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-    @Query('search') search: string,
+    // @Query('search') search: string,
+    @Query('email') email: string,
+    @Query('name') name: string,
+    @Query('role') role: string,
     @Query('sort') sort: 'ASC' | 'DESC',
   ): Promise<{
     count: number;
@@ -90,15 +96,21 @@ export class UsersController {
     perpage: number;
     data: User[];
   }> {
-    if (!search) {
-      search = '';
-    }
+    // if (!search) {
+    //   search = '';
+    // }
+    if (!email) email = '';
+    if (!name) name = '';
+    if (!role) role = '';
 
     try {
       const userList = await this.usersService.getList(
         page,
         limit,
-        search,
+        // search,
+        email,
+        name,
+        role,
         sort,
       );
       return userList;
@@ -110,11 +122,19 @@ export class UsersController {
     }
   }
 
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.USER)
   @Permissions(Permission.READ)
   @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get(':id')
   findOne(@Param('id') id: number) {
+    return this.usersService.findById(id);
+  }
+
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
+  @Get('admin/user/:id')
+  getUser(@Param('id') id: number) {
     return this.usersService.findById(id);
   }
 

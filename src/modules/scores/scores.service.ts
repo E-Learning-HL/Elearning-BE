@@ -25,11 +25,12 @@ export class ScoresService {
     }
   }
 
-  async findOne(id: number, taskId : number) {
+  async findOne(userId: number, taskId : number) {
     try {
       return await this.scoreRepository.findOne({
         where: {
-          id : id,
+          // id : id,
+          user : {id : userId},
           task : {id : taskId}
         },
         relations : ['task']

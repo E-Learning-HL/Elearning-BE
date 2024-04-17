@@ -15,6 +15,10 @@ import { Section } from '../sections/entities/section.entity';
 import { Lesson } from '../lessons/entities/lesson.entity';
 import { FileEntity } from '../file/entities/file.entity';
 import { ASSIGNINMENT_TYPE } from '../assignments/constants/assignment-type.enum';
+import { Assignment } from '../assignments/entities/assignment.entity';
+import { Task } from '../tasks/entities/task.entity';
+import { Question } from '../questions/entities/question.entity';
+import { Answer } from '../answers/entities/answer.entity';
 
 @Injectable()
 export class CoursesService {
@@ -27,6 +31,14 @@ export class CoursesService {
     private lessonRepository: Repository<Lesson>,
     @InjectRepository(FileEntity)
     private fileRepository: Repository<FileEntity>,
+    @InjectRepository(Assignment)
+    private assignmentRepository: Repository<Assignment>,
+    @InjectRepository(Question)
+    private questionRepository: Repository<Question>,
+    @InjectRepository(Answer)
+    private answerRepository: Repository<Answer>,
+    @InjectRepository(Task)
+    private taskRepository: Repository<Task>,
     private readonly fileService: FileService,
   ) {}
 
@@ -626,12 +638,81 @@ export class CoursesService {
     };
   }
 
-  async deleteCourseById(id: number): Promise<string> {
-    const course = await this.courseRepository.findOne({ where: { id: id } });
+  async deleteCourseById(id: number): Promise<any> {
+    const course = await this.courseRepository.findOne({ 
+      where: { id: id },
+      relations: [
+        'section', 
+        'section.lesson', 
+        'section.lesson.file', 
+        'section.assignment.task',
+        'section.assignment.task.file',
+        'section.assignment.task.question',
+        'section.assignment.task.question.answer',
+        'file', 
+      ], 
+    });
+  
     if (!course) {
       throw new NotFoundException('Course not found');
     }
+  
+    // Xoá tất cả các questions của các tasks trong các assignments trong các sections của course
+    await Promise.all(course.section.map(async (section) => {
+      await Promise.all(section.assignment.map(async (assignment) => {
+        await Promise.all(assignment.task.map(async (task) => {
+          await Promise.all(task.question.map(async (question) => {
+            await Promise.all(question.answer.map(async (answer) => {
+              await this.answerRepository.remove(answer);
+            }));
+            await this.questionRepository.remove(question);
+          }));
+        }));
+      }));
+    }));
+  
+    // Xoá tất cả các tasks của các assignments trong các sections của course
+    await Promise.all(course.section.map(async (section) => {
+      await Promise.all(section.assignment.map(async (assignment) => {
+        await this.taskRepository.remove(assignment.task);
+      }));
+    }));
+  
+    // Xoá tất cả các files của các lessons trong các sections của course
+    await Promise.all(course.section.map(async (section) => {
+      await Promise.all(section.lesson.map(async (lesson) => {
+        await Promise.all(lesson.file.map(async (file) => {
+          await this.fileRepository.remove(file);
+        }));
+      }));
+    }));
+  
+    // Xoá tất cả các files của các tasks trong các assignments trong các sections của course
+    await Promise.all(course.section.map(async (section) => {
+      await Promise.all(section.assignment.map(async (assignment) => {
+        await Promise.all(assignment.task.map(async (task) => {
+          await Promise.all(task.file.map(async (file) => {
+            await this.fileRepository.remove(file);
+          }));
+        }));
+      }));
+    }));
+  
+    // Xoá tất cả các files của course
+    await Promise.all(course.file.map(async (file) => {
+      await this.fileRepository.remove(file);
+    }));
+  
+    // Xoá tất cả các sections của course
+    await this.sectionRepository.remove(course.section);
+  
+    // Xoá course
     await this.courseRepository.remove(course);
-    return 'Course deleted successfully';
+  
+    return {
+      status: HttpStatus.OK,
+      message: 'Course deleted successfully'
+    };
   }
+  
 }

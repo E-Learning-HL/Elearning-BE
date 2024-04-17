@@ -12,6 +12,7 @@ import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { paginate, Pagination } from 'nestjs-typeorm-paginate';
+import { Role } from '../roles/constants/role.enum';
 
 @Injectable()
 export class UsersService {
@@ -35,7 +36,10 @@ export class UsersService {
   async getList(
     page: number = 1,
     limit: number = 10,
-    search: string = '',
+    // search: string = '',
+    email: string = '',
+    name: string = '',
+    role: string = '',
     sort: 'ASC' | 'DESC' = 'DESC',
   ): Promise<{
     count: number;
@@ -51,12 +55,27 @@ export class UsersService {
       take: limit,
     };
 
-    const keyword = search.trim();
-    if (keyword !== '') {
-      searchCondition.where = [
-        { email: Like(`%${keyword}%`) },
-        { name: Like(`%${keyword}%`) },
-      ];
+    // const keyword = search.trim();
+    // if (keyword !== '') {
+    //   searchCondition.where = [
+    //     { email: Like(`%${keyword}%`) },
+    //     { name: Like(`%${keyword}%`) },
+    //   ];
+    // }
+    if (email.trim() !== '' && name.trim() !== '' && role.trim() !== '') {
+      searchCondition.where = { email: Like(`%${email.trim().trim()}%`), name: Like(`%${name}%`), role: role as Role  };
+    } else if (name.trim() !== '' && role.trim() !== '') {
+      searchCondition.where = { name: Like(`%${name.trim()}%`), role: role as Role  };
+    } else if (role.trim() !== '' && email.trim() !== '') {
+      searchCondition.where = { role: role as Role , email: Like(`%${email.trim()}%`)};
+    }else if (name.trim() !== '' && email.trim() !== '') {
+      searchCondition.where = { name: Like(`%${name.trim()}%`) , email: Like(`%${email.trim()}%`)};
+    } else if (email.trim() !== ''){
+      searchCondition.where = {  email: Like(`%${email.trim()}%`)};
+    }else if (name.trim() !== ''){
+      searchCondition.where = {  name: Like(`%${name.trim()}%`)};
+    }else if (role.trim() !== ''){
+      searchCondition.where = {  role: role as Role };
     }
 
     const [users, count] = await this.usersRepository.findAndCount(
@@ -82,7 +101,7 @@ export class UsersService {
   findById(id: number): Promise<User | undefined> {
     const user = this.usersRepository.findOneOrFail({
       where: { id: id },
-      select: ['name', 'email', 'phone', 'address', 'isActive'],
+      select: ['name', 'email', 'phone', 'address', 'isActive', 'role'],
     });
 
     return user;
@@ -232,6 +251,9 @@ export class UsersService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-    return { status: HttpStatus.OK, message: 'New password update successfully' };
+    return {
+      status: HttpStatus.OK,
+      message: 'New password update successfully',
+    };
   }
 }

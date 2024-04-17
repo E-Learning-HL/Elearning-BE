@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ScoresService } from './scores.service';
 import { CreateScoreDto } from './dto/create-score.dto';
@@ -41,10 +42,11 @@ export class ScoresController {
   @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get(':id/:taskId')
   findOne(
-    @Param('id') id: number,
+    // @Param('id') id: number,
+    @Req() req,
     @Param('taskId') taskId: number
 ) {
-    return this.scoresService.findOne(id, taskId);
+    return this.scoresService.findOne(req.user.id, taskId);
   }
 
   @Patch(':id')

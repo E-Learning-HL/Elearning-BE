@@ -100,9 +100,9 @@ export class CoursesController {
     return await this.coursesService.findOne(id);
   }
 
-  // @Roles(Role.ADMIN, Role.SUPER_ADMIN)
-  // @Permissions(Permission.READ)
-  // @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get('get-course-public/:id')
   async findCoursePublic(@Param('id') id: number) {
     const isActive = true;
