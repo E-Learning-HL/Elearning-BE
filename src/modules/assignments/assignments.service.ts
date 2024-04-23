@@ -544,4 +544,23 @@ export class AssignmentsService {
     await this.assignmentRepository.remove(assignment);
     return `Assignment by ${id}  deleted successfully`;
   }
+
+  async getScoreAssignment(id: number, userId: number): Promise<Assignment> {
+    try {
+      return await this.assignmentRepository.createQueryBuilder('assignment')
+        .leftJoinAndSelect('assignment.task', 'task')
+        .leftJoinAndSelect('task.score', 'score')
+        .leftJoin('score.user', 'user')
+        .where('assignment.id = :id', { id })
+        .andWhere('user.id = :userId', { userId })
+        .getOneOrFail();
+    } catch (e) {
+      throw new HttpException(
+        "There's an error when getting assignment by id",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+  
+  
 }

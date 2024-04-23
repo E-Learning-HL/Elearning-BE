@@ -1,6 +1,6 @@
 import { BaseEntity } from 'src/database/base/base.entity';
 import { Assignment } from 'src/modules/assignments/entities/assignment.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { FileEntity } from 'src/modules/file/entities/file.entity';
 import { Question } from 'src/modules/questions/entities/question.entity';
 import { TASK_TYPE } from '../constants/task-type.enum';
@@ -33,8 +33,8 @@ export class Task extends BaseEntity {
   @OneToMany(() => Question, (question) => question.task, { cascade: true })
   question: Question[];
 
-  @OneToMany(() => Score, (score) => score.task, { cascade: true })
-  score: Score[];
+  @OneToOne(() => Score, (score) => score.task, { cascade: true })
+  score: Score;
 
   @OneToMany(() => UserAnswer, (userAnswer) => userAnswer.task, {
     cascade: true,

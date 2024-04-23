@@ -13,6 +13,7 @@ import {
   HttpException,
   HttpStatus,
   Put,
+  Req,
 } from '@nestjs/common';
 import { AssignmentsService } from './assignments.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
@@ -96,10 +97,16 @@ export class AssignmentsController {
   // @Permissions(Permission.READ)
   // @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get('get-exam/:courseId')
-  findAllAssignmentByCourse(
-    @Param('courseId') courseId: number,
-  ) {
+  findAllAssignmentByCourse(@Param('courseId') courseId: number) {
     return this.assignmentsService.findAllCourse(courseId);
+  }
+
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.USER)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
+  @Get('get-score/:id')
+  getScoreAssignment(@Param('id') id: number, @Req() req) {
+    return this.assignmentsService.getScoreAssignment(id, req.user.id);
   }
 
   // @Roles(Role.SUPER_ADMIN, Role.ADMIN)
