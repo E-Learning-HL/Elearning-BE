@@ -110,7 +110,7 @@ export class UserAnswersService {
         const answerTexts = question.answer.map((answer) => answer.answerText);
         switch (question.questionType) {
           case QUESTION_TYPE.SIMPLE_CHOICE:
-            totalScore += await this.calculateSimpleChoiceScore(answerIds);
+            totalScore += await this.calculateSimpleChoiceScore(question.questionId, answerIds);
             break;
           case QUESTION_TYPE.MULTIPLE_CHOICE:
             if (
@@ -141,38 +141,26 @@ export class UserAnswersService {
     questionId: number,
     answerIds: number[],
   ): Promise<boolean> {
-    const correctAnswers = await this.answerRepository.find({
+    const correctAnswerCount = await this.answerRepository.count({
       where: {
         question: { id: questionId },
         id: In(answerIds),
         isCorrect: true,
       },
     });
-    return correctAnswers.length === answerIds.length;
+    
+    // Số lượng đáp án đúng trong câu hỏi
+    const totalCorrectAnswers = await this.answerRepository.count({
+      where: {
+        question: { id: questionId },
+        isCorrect: true,
+      },
+    });
+    
+    // Trả về true nếu số lượng đáp án đúng đã chọn bằng số lượng đáp án đúng trong câu hỏi
+    return correctAnswerCount === totalCorrectAnswers;
   }
-
-  // tính số câu đúng với questionType == INPUT
-  // private async isInputCorrect(
-  //   questionId: number,
-  //   answerIds: number[],
-  //   answerTexts: string[],
-  // ): Promise<number> {
-  //   let correctAnswerCount = 0;
-  //   for (let i = 0; i < answerIds.length; i++) {
-  //     const correctAnswer = await this.answerRepository.findOne({
-  //       where: {
-  //         question: { id: questionId },
-  //         id: answerIds[i],
-  //         content: answerTexts[i],
-  //         isCorrect: true,
-  //       },
-  //     });
-  //     if (correctAnswer) {
-  //       correctAnswerCount++; // Tăng số lượng đáp án đúng nếu tìm thấy đáp án đúng
-  //     }
-  //   }
-  //   return correctAnswerCount; // Trả về số lượng đáp án đúng
-  // }
+  
   private async isInputCorrect(
     questionId: number,
     answerTexts: string[],
@@ -207,11 +195,12 @@ export class UserAnswersService {
 
   // tính số câu đúng với questionType == SIMPLE_CHOICE
   private async calculateSimpleChoiceScore(
+    questionId: number,
     answerIds: number[],
   ): Promise<number> {
     const correctAnswerId = answerIds[0];
     const correctAnswer = await this.answerRepository.findOne({
-      where: { id: correctAnswerId },
+      where: { id: correctAnswerId , question: { id: questionId } },
     });
     if (!correctAnswer) {
       throw new HttpException('No  found  Answer ', HttpStatus.NOT_FOUND);
