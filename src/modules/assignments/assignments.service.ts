@@ -553,6 +553,9 @@ export class AssignmentsService {
         .leftJoin('score.user', 'user')
         .where('assignment.id = :id', { id })
         .andWhere('user.id = :userId', { userId })
+        .orderBy('score.createdAt', 'DESC') // Sắp xếp theo thời gian giảm dần
+        .addOrderBy('score.id', 'DESC') // Sắp xếp theo id giảm dần (đảm bảo lấy điểm gần nhất)
+        .take(1) // Chỉ lấy 1 bản ghi
         .getOneOrFail();
     } catch (e) {
       throw new HttpException(
