@@ -80,7 +80,7 @@ export class PaymentsService {
     payments.user = user;
     payments.paymentMethod = paymentMethod;
 
-    const paymentReult = await this.paymentRepository.save(payments);
+    const paymentResult = await this.paymentRepository.save(payments);
 
     for (const item of createPaymentDto.course) {
       const course = new Course();
@@ -88,7 +88,7 @@ export class PaymentsService {
 
       const paymentDetail = new PaymentDetail();
       paymentDetail.course = course;
-      paymentDetail.payment = paymentReult;
+      paymentDetail.payment = paymentResult;
 
       const paymentDetailResult = await this.paymentDetailRepository.save(
         paymentDetail,
@@ -97,6 +97,7 @@ export class PaymentsService {
 
     return {
       status: HttpStatus.OK,
+      paymentId: paymentResult.id,
     };
   }
 

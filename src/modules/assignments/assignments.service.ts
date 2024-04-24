@@ -176,15 +176,17 @@ export class AssignmentsService {
     };
   }
 
-  async findAllCourse(courseId : number) : Promise<{ course: any, listAssignment: Assignment[] }>{
+  async findAllCourse(
+    courseId: number,
+  ): Promise<{ course: any; listAssignment: Assignment[] }> {
     try {
       const assignments = await this.assignmentRepository.find({
-        where: { 
-          course :{
-            id : courseId,
-            isActive : true
+        where: {
+          course: {
+            id: courseId,
+            isActive: true,
           },
-          assignmentType : ASSIGNINMENT_TYPE.TESTS,
+          assignmentType: ASSIGNINMENT_TYPE.TESTS,
         },
         relations: [
           'course',
@@ -195,7 +197,10 @@ export class AssignmentsService {
         ],
       });
       if (!assignments || assignments.length === 0) {
-        throw new HttpException('No assignments found for the course', HttpStatus.NOT_FOUND);
+        throw new HttpException(
+          'No assignments found for the course',
+          HttpStatus.NOT_FOUND,
+        );
       }
 
       // Lấy thông tin của khóa học
@@ -429,9 +434,13 @@ export class AssignmentsService {
                 question,
               );
 
-              const oldAnswer = itemTask.question
-                .find((item) => item.questionId == questionDto.questionId)
-                ?.answer?.map((itemAnswer) => itemAnswer.answerId);
+              const oldAnswer = oldAssignment.task.find(
+                (item) => item.id == itemTask.taskId,
+              )?.question.find((itemQuestion) => itemQuestion.id == questionDto.questionId)?.answer.map((itemAnswer) => itemAnswer.id)
+
+              // const oldAnswer = question?.answer?.map(
+              //   (itemAnswer) => itemAnswer.id,
+              // );
               // Lấy các ID của answer mới
               const newAnswer = questionDto.answer.map((item) => item.answerId);
 
@@ -499,7 +508,7 @@ export class AssignmentsService {
   //   const assignment = await this.assignmentRepository.findOne({
   //     where: { id: id },
   //     relations: [
-  //     'task',          
+  //     'task',
   //     'task.userAnswer',
   //   ],
   //   });
@@ -553,10 +562,7 @@ export class AssignmentsService {
   async remove(id: number): Promise<string> {
     const assignment = await this.assignmentRepository.findOne({
       where: { id: id },
-      relations: [
-        'task',          
-        'task.userAnswer',
-      ],
+      relations: ['task', 'task.userAnswer'],
     });
     if (!assignment) {
       throw new NotFoundException('Assignment not found');
@@ -622,21 +628,20 @@ export class AssignmentsService {
 
     await this.assignmentRepository.remove(assignment);
     return `Assignment by ${id} deleted successfully`;
-}
-
-  
+  }
 
   async getScoreAssignment(id: number, userId: number): Promise<Assignment> {
     try {
-      return await this.assignmentRepository.createQueryBuilder('assignment')
+      return await this.assignmentRepository
+        .createQueryBuilder('assignment')
         .leftJoinAndSelect('assignment.task', 'task')
         .leftJoinAndSelect('task.score', 'score')
         .leftJoin('score.user', 'user')
         .where('assignment.id = :id', { id })
         .andWhere('user.id = :userId', { userId })
-        .orderBy('score.createdAt', 'DESC') 
-        .addOrderBy('score.id', 'DESC') 
-        .take(1) 
+        .orderBy('score.createdAt', 'DESC')
+        .addOrderBy('score.id', 'DESC')
+        .take(1)
         .getOneOrFail();
     } catch (e) {
       throw new HttpException(
@@ -645,6 +650,4 @@ export class AssignmentsService {
       );
     }
   }
-  
-  
 }
