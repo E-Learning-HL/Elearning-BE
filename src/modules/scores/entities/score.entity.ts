@@ -8,6 +8,11 @@ export class Score extends BaseEntity {
   @Column()
   score: number;
 
+  @Column({
+    nullable: true,
+  })
+  total: number;
+
   @ManyToOne(() => Task, (task) => task.score)
   @JoinColumn({
     name: 'task_id',

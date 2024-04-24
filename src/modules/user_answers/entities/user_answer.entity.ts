@@ -19,7 +19,7 @@ export class UserAnswer extends BaseEntity {
   })
   user: User;
 
-  @ManyToOne(() => Question, (question) => question.userAnswer, {nullable: true,})
+  @ManyToOne(() => Question, (question) => question.userAnswer, {nullable: true})
   @JoinColumn({
     name: 'qestion_id',
   })

@@ -93,7 +93,7 @@ export class UserAnswersService {
     const score = await this.calculateScore(createUserAnswerDto);
 
     // Lưu điểm vào cơ sở dữ liệu
-    await this.saveScore(userId, createUserAnswerDto.taskId, score);
+    await this.saveScore(userId, createUserAnswerDto.taskId, score, createUserAnswerDto);
 
     return score;
   }
@@ -213,6 +213,7 @@ export class UserAnswersService {
     userId: number,
     taskId: number,
     score: number,
+    createUserAnswerDto : CreateUserAnswerDto,
   ): Promise<void> {
     const newScore = new Score();
     newScore.score = score;
@@ -223,6 +224,23 @@ export class UserAnswersService {
       if (oldTask) {
         newScore.task = oldTask;
       }
+      let total = 0;
+      for (const question of createUserAnswerDto.question) {
+        switch (question.questionType) {
+          case QUESTION_TYPE.SIMPLE_CHOICE:
+          case QUESTION_TYPE.MULTIPLE_CHOICE:
+            total += 1; // Mỗi câu hỏi đúng được 1 điểm
+            break;
+          case QUESTION_TYPE.INPUT:
+            total += question.answer.length; // Tổng số câu trả lời đúng cho loại INPUT
+            break;
+          default:
+            break;
+        }
+      }
+
+      newScore.total = total;
+
     }
     if (userId !== undefined) {
       const oldUser = await this.usersRepository.findOne({

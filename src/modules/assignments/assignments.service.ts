@@ -22,6 +22,7 @@ import { logger } from 'handlebars';
 import { FileEntity } from '../file/entities/file.entity';
 import { Lesson } from '../lessons/entities/lesson.entity';
 import { ASSIGNINMENT_TYPE } from './constants/assignment-type.enum';
+import { UserAnswer } from '../user_answers/entities/user_answer.entity';
 
 @Injectable()
 export class AssignmentsService {
@@ -38,6 +39,8 @@ export class AssignmentsService {
     private lessonRepository: Repository<Lesson>,
     @InjectRepository(FileEntity)
     private fileRepository: Repository<FileEntity>,
+    @InjectRepository(UserAnswer)
+    private userAnswerRepository: Repository<UserAnswer>,
     private readonly fileService: FileService,
   ) {}
 
@@ -492,19 +495,93 @@ export class AssignmentsService {
     };
   }
 
+  // async remove(id: number): Promise<string> {
+  //   const assignment = await this.assignmentRepository.findOne({
+  //     where: { id: id },
+  //     relations: [
+  //     'task',          
+  //     'task.userAnswer',
+  //   ],
+  //   });
+  //   if (!assignment) {
+  //     throw new NotFoundException('Assignment not found');
+  //   }
+  //   // Xoá các tệp tin liên quan đến các nhiệm vụ của bài tập trước
+  //   if (assignment.task && assignment.task.length > 0) {
+  //     await Promise.all(
+  //       assignment.task.map(async (task) => {
+  //         //xoá question, answer
+  //         const questions = await this.questionRepository.find({
+  //           where: { task: { id: task.id } },
+  //         });
+  //         if (questions && questions.length > 0) {
+  //           await Promise.all(
+  //             questions.map(async (question) => {
+  //               const answers = await this.answerRepository.find({
+  //                 where: { question: { id: question.id } },
+  //               });
+  //               if (answers && answers.length > 0) {
+  //                 await Promise.all(
+  //                   answers.map(async (answer) => {
+  //                     await this.answerRepository.remove(answer);
+  //                   }),
+  //                 );
+  //               }
+  //               await this.questionRepository.remove(question);
+  //             }),
+  //           );
+  //         }
+
+  //         // xoá các file
+  //         const files = await this.fileRepository.find({
+  //           where: { task: { id: task.id } },
+  //         });
+  //         if (files && files.length > 0) {
+  //           await Promise.all(
+  //             files.map(async (file) => {
+  //               await this.fileRepository.remove(file);
+  //             }),
+  //           );
+  //         }
+  //         await this.taskRepository.remove(task);
+  //       }),
+  //     );
+  //   }
+  //   await this.assignmentRepository.remove(assignment);
+  //   return `Assignment by ${id}  deleted successfully`;
+  // }
   async remove(id: number): Promise<string> {
     const assignment = await this.assignmentRepository.findOne({
       where: { id: id },
-      relations: ['task'],
+      relations: [
+        'task',          
+        'task.userAnswer',
+      ],
     });
     if (!assignment) {
       throw new NotFoundException('Assignment not found');
     }
+
     // Xoá các tệp tin liên quan đến các nhiệm vụ của bài tập trước
     if (assignment.task && assignment.task.length > 0) {
       await Promise.all(
         assignment.task.map(async (task) => {
-          //xoá question, answer
+          // Xoá các userAnswer trước
+          if (task.userAnswer && task.userAnswer.length > 0) {
+            await Promise.all(
+              task.userAnswer.map(async (userAnswer) => {
+                if (userAnswer.question) {
+                  await this.questionRepository.remove(userAnswer.question);
+                }
+                if (userAnswer.answer) {
+                  await this.answerRepository.remove(userAnswer.answer);
+                }
+                await this.userAnswerRepository.remove(userAnswer);
+              }),
+            );
+          }
+
+          // Xoá các question và answer trong task
           const questions = await this.questionRepository.find({
             where: { task: { id: task.id } },
           });
@@ -526,7 +603,7 @@ export class AssignmentsService {
             );
           }
 
-          // xoá các file
+          // Xoá các file
           const files = await this.fileRepository.find({
             where: { task: { id: task.id } },
           });
@@ -537,13 +614,17 @@ export class AssignmentsService {
               }),
             );
           }
+
           await this.taskRepository.remove(task);
         }),
       );
     }
+
     await this.assignmentRepository.remove(assignment);
-    return `Assignment by ${id}  deleted successfully`;
-  }
+    return `Assignment by ${id} deleted successfully`;
+}
+
+  
 
   async getScoreAssignment(id: number, userId: number): Promise<Assignment> {
     try {
@@ -553,9 +634,9 @@ export class AssignmentsService {
         .leftJoin('score.user', 'user')
         .where('assignment.id = :id', { id })
         .andWhere('user.id = :userId', { userId })
-        .orderBy('score.createdAt', 'DESC') // Sắp xếp theo thời gian giảm dần
-        .addOrderBy('score.id', 'DESC') // Sắp xếp theo id giảm dần (đảm bảo lấy điểm gần nhất)
-        .take(1) // Chỉ lấy 1 bản ghi
+        .orderBy('score.createdAt', 'DESC') 
+        .addOrderBy('score.id', 'DESC') 
+        .take(1) 
         .getOneOrFail();
     } catch (e) {
       throw new HttpException(
