@@ -176,9 +176,53 @@ export class AssignmentsService {
     };
   }
 
+  // async findAllCourse(
+  //   courseId: number,
+  // ): Promise<{ course: any; listAssignment: Assignment[] }> {
+  //   try {
+  //     const assignments = await this.assignmentRepository.find({
+  //       where: {
+  //         course: {
+  //           id: courseId,
+  //           isActive: true,
+  //         },
+  //         assignmentType: ASSIGNINMENT_TYPE.TESTS,
+  //       },
+  //       relations: [
+  //         'course',
+  //         'task',
+  //         'task.question',
+  //         'task.question.answer',
+  //         'task.score',
+  //         'task.file',
+  //       ],
+  //     });
+  //     if (!assignments || assignments.length === 0) {
+  //       throw new HttpException(
+  //         'No assignments found for the course',
+  //         HttpStatus.NOT_FOUND,
+  //       );
+  //     }
+
+  //     // Lấy thông tin của khóa học
+  //     const course = assignments[0].course;
+
+  //     // Trả về đối tượng chứa thông tin khóa học và danh sách bài tập
+  //     return {
+  //       course,
+  //       listAssignment: assignments,
+  //     };
+  //   } catch (e) {
+  //     throw new HttpException(
+  //       "There's an error when get assignment by id",
+  //       HttpStatus.INTERNAL_SERVER_ERROR,
+  //     );
+  //   }
+  // }
+
   async findAllCourse(
     courseId: number,
-  ): Promise<{ course: any; listAssignment: Assignment[] }> {
+  ): Promise<{ course: any; listAssignment: { id: number; nameAssignment: string; order: number; assignmentType: string; isActive: boolean; course: any; task: any[]; isChecked: boolean }[] }> {
     try {
       const assignments = await this.assignmentRepository.find({
         where: {
@@ -193,6 +237,7 @@ export class AssignmentsService {
           'task',
           'task.question',
           'task.question.answer',
+          'task.score',
           'task.file',
         ],
       });
@@ -202,14 +247,80 @@ export class AssignmentsService {
           HttpStatus.NOT_FOUND,
         );
       }
-
+  
       // Lấy thông tin của khóa học
       const course = assignments[0].course;
-
-      // Trả về đối tượng chứa thông tin khóa học và danh sách bài tập
+  
+      // Tạo mảng mới chứa thông tin của từng assignment và trường isChecked
+      const listAssignment = assignments.map(assignment => {
+        let isChecked = false;
+        for (const task of assignment.task) {
+          if (task.score !== null) {
+            isChecked = true;
+            break;
+          }
+        }
+        return { 
+          id: assignment.id,
+          nameAssignment: assignment.nameAssignment,
+          order: assignment.order,
+          assignmentType: assignment.assignmentType,
+          isActive: assignment.isActive,
+          course: assignment.course,
+          task: assignment.task,
+          isChecked 
+        };
+      });
+  
+      // Trả về đối tượng chứa thông tin khóa học và danh sách bài tập, mỗi phần tử có biến isChecked
       return {
         course,
-        listAssignment: assignments,
+        listAssignment: listAssignment.map(item => ({
+          id: item.id,
+          nameAssignment: item.nameAssignment,
+          order: item.order,
+          assignmentType: item.assignmentType,
+          isActive: item.isActive,
+          course: {
+            id: item.course.id,
+            nameCourse: item.course.nameCourse,
+            price: item.course.price,
+            introduce: item.course.introduce,
+            listening: item.course.listening,
+            speaking: item.course.speaking,
+            reading: item.course.reading,
+            writing: item.course.writing,
+            start: item.course.start,
+            target: item.course.target,
+            isActive: item.course.isActive
+          },
+          task: item.task.map(task => ({
+            id: task.id,
+            content: task.content,
+            taskType: task.taskType,
+            question: task.question.map(question => ({
+              id: question.id,
+              title: question.title,
+              questionType: question.questionType,
+              answer: question.answer.map(answer => ({
+                id: answer.id,
+                content: answer.content,
+                isCorrect: answer.isCorrect
+              }))
+            })),
+            score: task.score ? {
+              id: task.score.id,
+              score: task.score.score,
+              total: task.score.total
+            } : null,
+            file: task.file.map(file => ({
+              id: file.id,
+              url: file.url,
+              name: file.name
+            }))
+          })),
+          isChecked: item.isChecked 
+        })),
       };
     } catch (e) {
       throw new HttpException(
@@ -218,6 +329,7 @@ export class AssignmentsService {
       );
     }
   }
+  
 
   async findOne(id: number): Promise<Assignment | null> {
     try {
@@ -255,7 +367,6 @@ export class AssignmentsService {
         'section',
       ],
     });
-    console.log('course : ', oldAssignment);
 
     if (!oldAssignment) {
       throw new NotFoundException('Assignment not found');
@@ -305,7 +416,6 @@ export class AssignmentsService {
           for (const answer of answerToDelete) {
             await this.answerRepository.delete(answer.id);
           }
-
           await this.questionRepository.delete(question.id);
         }
         await this.taskRepository.delete(taskId);
