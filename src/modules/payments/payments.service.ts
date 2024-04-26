@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -28,7 +29,6 @@ import { IdTokenClient } from 'google-auth-library';
 import { UpdateStatusPaymentDto } from './dto/update-status-payment.dto';
 import { PaymentDetailsService } from '../payment_details/payment_details.service';
 import { Enrolment } from '../enrolments/entities/enrolment.entity';
-import { Account } from 'aws-sdk';
 
 @Injectable()
 export class PaymentsService {
@@ -52,6 +52,55 @@ export class PaymentsService {
     private enrolmentRepository: Repository<Enrolment>,
   ) {}
 
+  // async create(id: number, createPaymentDto: CreatePaymentDto) {
+  //   const user = await this.usersService.findById(id);
+
+  //   if (!user) {
+  //     throw new NotFoundException({
+  //       status: HttpStatus.NOT_FOUND,
+  //       message: 'User not found',
+  //     });
+  //   }
+  //   user.id = id;
+
+  //   const paymentMethod = await this.paymentMethodService.findOne(
+  //     createPaymentDto.paymentMethodId,
+  //   );
+
+  //   if (!paymentMethod) {
+  //     throw new NotFoundException({
+  //       status: HttpStatus.NOT_FOUND,
+  //       message: 'Payment Method not found',
+  //     });
+  //   }
+  //   paymentMethod.id = createPaymentDto.paymentMethodId;
+  //   const payments = new Payment();
+  //   payments.amount = createPaymentDto.amount;
+  //   payments.status = PAYMENT_STATUS.PENDING;
+  //   payments.user = user;
+  //   payments.paymentMethod = paymentMethod;
+
+  //   const paymentResult = await this.paymentRepository.save(payments);
+
+  //   for (const item of createPaymentDto.course) {
+  //     const course = new Course();
+  //     course.id = item.courseId;
+
+  //     const paymentDetail = new PaymentDetail();
+  //     paymentDetail.course = course;
+  //     paymentDetail.payment = paymentResult;
+
+  //     const paymentDetailResult = await this.paymentDetailRepository.save(
+  //       paymentDetail,
+  //     );
+  //   }
+
+  //   return {
+  //     status: HttpStatus.OK,
+  //     paymentId: paymentResult.id,
+  //   };
+  // }
+
   async create(id: number, createPaymentDto: CreatePaymentDto) {
     const user = await this.usersService.findById(id);
 
@@ -63,6 +112,34 @@ export class PaymentsService {
     }
     user.id = id;
 
+    // Kiểm tra tổng giá của các khóa học
+    let totalCoursePrice = 0;
+    for (const item of createPaymentDto.course) {
+      const course = await this.courseRepository.findOne({
+        where: { id: item.courseId },
+      });
+      if (!course) {
+        throw new NotFoundException({
+          status: HttpStatus.NOT_FOUND,
+          message: `Course with ID ${item.courseId} not found`,
+        });
+      }
+      totalCoursePrice += course.price;
+    }
+
+    if (createPaymentDto.course.length > 1) {
+      totalCoursePrice *= 0.7;
+    }
+
+    // So sánh tổng giá với số tiền gửi lên
+    if (createPaymentDto.amount !== totalCoursePrice) {
+      throw new BadRequestException({
+        status: HttpStatus.BAD_REQUEST,
+        message: `Invalid amount. The amount should be ${totalCoursePrice}`,
+      });
+    }
+
+    // Tiếp tục tạo thanh toán nếu số tiền gửi lên đúng
     const paymentMethod = await this.paymentMethodService.findOne(
       createPaymentDto.paymentMethodId,
     );
@@ -100,69 +177,6 @@ export class PaymentsService {
       paymentId: paymentResult.id,
     };
   }
-
-  // @Transaction()
-  // async create(
-  //   id: number,
-  //   createPaymentDto: CreatePaymentDto,
-  //   @TransactionRepository() transactionalEntityManager?: EntityManager,
-  // ) {
-  //   const user = await this.usersService.findById(id);
-
-  //   if (!user) {
-  //     throw new NotFoundException({
-  //       status: HttpStatus.NOT_FOUND,
-  //       message: 'User not found',
-  //     });
-  //   }
-
-  //   const paymentMethod = await this.paymentMethodService.findOne(
-  //     createPaymentDto.paymentMethodId,
-  //   );
-
-  //   if (!paymentMethod) {
-  //     throw new NotFoundException({
-  //       status: HttpStatus.NOT_FOUND,
-  //       message: 'Payment Method not found',
-  //     });
-  //   }
-
-  //   const payment = new Payment();
-  //   payment.amount = createPaymentDto.amount;
-  //   payment.status = PAYMENT_STATUS.PENDING;
-  //   payment.user = user;
-  //   payment.paymentMethod = paymentMethod;
-
-  //   // Save payment
-  //   if (transactionalEntityManager) {
-  //     const savedPayment = await transactionalEntityManager.save(payment);
-  //     for (const item of createPaymentDto.course) {
-  //       const course = await this.courseRepository.findOne({
-  //         where: { id: item.courseId },
-  //       });
-  //       if (!course) {
-  //         throw new NotFoundException({
-  //           status: HttpStatus.NOT_FOUND,
-  //           message: `Course with id ${item.courseId} not found`,
-  //         });
-  //       }
-
-  //       const paymentDetail = new PaymentDetail();
-  //       paymentDetail.course = course;
-  //       paymentDetail.payment = savedPayment;
-
-  //       if (transactionalEntityManager) {
-  //         await transactionalEntityManager.save(paymentDetail);
-  //       } else {
-  //         throw new Error('Transactional entity manager is undefined.');
-  //       }
-  //     }
-  //   } else {
-  //     throw new Error('Transactional entity manager is undefined.');
-  //   }
-
-  //   return HttpStatus.OK;
-  // }
 
   async findAll(
     page: number = 1,

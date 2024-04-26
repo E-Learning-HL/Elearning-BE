@@ -220,9 +220,19 @@ export class AssignmentsService {
   //   }
   // }
 
-  async findAllCourse(
-    courseId: number,
-  ): Promise<{ course: any; listAssignment: { id: number; nameAssignment: string; order: number; assignmentType: string; isActive: boolean; course: any; task: any[]; isChecked: boolean }[] }> {
+  async findAllCourse(courseId: number): Promise<{
+    course: any;
+    listAssignment: {
+      id: number;
+      nameAssignment: string;
+      order: number;
+      assignmentType: string;
+      isActive: boolean;
+      course: any;
+      task: any[];
+      isChecked: boolean;
+    }[];
+  }> {
     try {
       const assignments = await this.assignmentRepository.find({
         where: {
@@ -247,12 +257,12 @@ export class AssignmentsService {
           HttpStatus.NOT_FOUND,
         );
       }
-  
+
       // Lấy thông tin của khóa học
       const course = assignments[0].course;
-  
+
       // Tạo mảng mới chứa thông tin của từng assignment và trường isChecked
-      const listAssignment = assignments.map(assignment => {
+      const listAssignment = assignments.map((assignment) => {
         let isChecked = false;
         for (const task of assignment.task) {
           if (task.score !== null) {
@@ -260,7 +270,7 @@ export class AssignmentsService {
             break;
           }
         }
-        return { 
+        return {
           id: assignment.id,
           nameAssignment: assignment.nameAssignment,
           order: assignment.order,
@@ -268,14 +278,14 @@ export class AssignmentsService {
           isActive: assignment.isActive,
           course: assignment.course,
           task: assignment.task,
-          isChecked 
+          isChecked,
         };
       });
-  
+
       // Trả về đối tượng chứa thông tin khóa học và danh sách bài tập, mỗi phần tử có biến isChecked
       return {
         course,
-        listAssignment: listAssignment.map(item => ({
+        listAssignment: listAssignment.map((item) => ({
           id: item.id,
           nameAssignment: item.nameAssignment,
           order: item.order,
@@ -292,34 +302,36 @@ export class AssignmentsService {
             writing: item.course.writing,
             start: item.course.start,
             target: item.course.target,
-            isActive: item.course.isActive
+            isActive: item.course.isActive,
           },
-          task: item.task.map(task => ({
+          task: item.task.map((task) => ({
             id: task.id,
             content: task.content,
             taskType: task.taskType,
-            question: task.question.map(question => ({
+            question: task.question.map((question) => ({
               id: question.id,
               title: question.title,
               questionType: question.questionType,
-              answer: question.answer.map(answer => ({
+              answer: question.answer.map((answer) => ({
                 id: answer.id,
                 content: answer.content,
-                isCorrect: answer.isCorrect
-              }))
+                isCorrect: answer.isCorrect,
+              })),
             })),
-            score: task.score ? {
-              id: task.score.id,
-              score: task.score.score,
-              total: task.score.total
-            } : null,
-            file: task.file.map(file => ({
+            score: task.score
+              ? {
+                  id: task.score.id,
+                  score: task.score.score,
+                  total: task.score.total,
+                }
+              : null,
+            file: task.file.map((file) => ({
               id: file.id,
               url: file.url,
-              name: file.name
-            }))
+              name: file.name,
+            })),
           })),
-          isChecked: item.isChecked 
+          isChecked: item.isChecked,
         })),
       };
     } catch (e) {
@@ -329,7 +341,6 @@ export class AssignmentsService {
       );
     }
   }
-  
 
   async findOne(id: number): Promise<Assignment | null> {
     try {
@@ -394,6 +405,15 @@ export class AssignmentsService {
 
       // xoa di nhung old task khong co trong new task
       for (const taskId of taskToDelete) {
+        const userAnswersToDelete = await this.userAnswerRepository.find({
+          where: { task: { id: taskId } },
+          relations: ['question', 'answer'],
+        });
+
+        for (const userAnswer of userAnswersToDelete) {
+          await this.userAnswerRepository.remove(userAnswer);
+        }
+
         const questionToDelete = await this.questionRepository.find({
           where: { task: { id: taskId } },
         });
@@ -517,11 +537,28 @@ export class AssignmentsService {
           );
           if (questionToDelete) {
             for (const question of questionToDelete) {
+              // Tìm và xóa các userAnswer liên quan đến câu hỏi này
+              const userAnswersToDelete = await this.userAnswerRepository.find({
+                where: { question: { id: question.id } },
+              });
+              for (const userAnswer of userAnswersToDelete) {
+                await this.userAnswerRepository.remove(userAnswer);
+              }
+
               const answerToDelete = await this.answerRepository.find({
                 where: { question: { id: question.id } },
               });
               // xoa answer
               for (const answer of answerToDelete) {
+                // Tìm và xóa các userAnswer liên quan đến câu hỏi này
+                const userAnswersToDelete =
+                  await this.userAnswerRepository.find({
+                    where: { answer: { id: answer.id } },
+                  });
+                for (const userAnswer of userAnswersToDelete) {
+                  await this.userAnswerRepository.remove(userAnswer);
+                }
+
                 await this.answerRepository.delete(answer.id);
               }
               await this.questionRepository.delete(question.id);
@@ -544,13 +581,13 @@ export class AssignmentsService {
                 question,
               );
 
-              const oldAnswer = oldAssignment.task.find(
-                (item) => item.id == itemTask.taskId,
-              )?.question.find((itemQuestion) => itemQuestion.id == questionDto.questionId)?.answer.map((itemAnswer) => itemAnswer.id)
+              const oldAnswer = oldAssignment.task
+                .find((item) => item.id == itemTask.taskId)
+                ?.question.find(
+                  (itemQuestion) => itemQuestion.id == questionDto.questionId,
+                )
+                ?.answer.map((itemAnswer) => itemAnswer.id);
 
-              // const oldAnswer = question?.answer?.map(
-              //   (itemAnswer) => itemAnswer.id,
-              // );
               // Lấy các ID của answer mới
               const newAnswer = questionDto.answer.map((item) => item.answerId);
 
@@ -559,6 +596,14 @@ export class AssignmentsService {
               );
               if (answerToDelete && answerToDelete.length > 0) {
                 for (const answer of answerToDelete) {
+                  const userAnswersToDelete =
+                    await this.userAnswerRepository.find({
+                      where: { answer: { id: answer } },
+                    });
+                  for (const userAnswer of userAnswersToDelete) {
+                    await this.userAnswerRepository.remove(userAnswer);
+                  }
+
                   await this.answerRepository.delete(answer);
                 }
               }
