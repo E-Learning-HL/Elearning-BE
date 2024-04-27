@@ -110,7 +110,6 @@ export class PaymentsService {
         message: 'User not found',
       });
     }
-    user.id = id;
 
     // Kiểm tra tổng giá của các khóa học
     let totalCoursePrice = 0;
@@ -137,6 +136,19 @@ export class PaymentsService {
         status: HttpStatus.BAD_REQUEST,
         message: `Invalid amount. The amount should be ${totalCoursePrice}`,
       });
+    }
+
+    // Kiểm tra xem user đã mua khóa học này chưa
+    for (const item of createPaymentDto.course) {
+      const enrolment = await this.enrolmentRepository.findOne({
+        where: { user: { id: id }, course: { id: item.courseId } },
+      });
+      if (enrolment) {
+        throw new BadRequestException({
+          status: HttpStatus.BAD_REQUEST,
+          message: `You has already purchased the course `,
+        });
+      }
     }
 
     // Tiếp tục tạo thanh toán nếu số tiền gửi lên đúng
