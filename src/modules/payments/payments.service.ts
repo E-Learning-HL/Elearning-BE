@@ -101,8 +101,8 @@ export class PaymentsService {
   //   };
   // }
 
-  async create(id: number, createPaymentDto: CreatePaymentDto) {
-    const user = await this.usersService.findById(id);
+  async create(userId: number, createPaymentDto: CreatePaymentDto) {
+    const user = await this.usersService.findById(userId);
 
     if (!user) {
       throw new NotFoundException({
@@ -141,7 +141,7 @@ export class PaymentsService {
     // Kiểm tra xem user đã mua khóa học này chưa
     for (const item of createPaymentDto.course) {
       const enrolment = await this.enrolmentRepository.findOne({
-        where: { user: { id: id }, course: { id: item.courseId } },
+        where: { user: { id: userId }, course: { id: item.courseId } },
       });
       if (enrolment) {
         throw new BadRequestException({
@@ -163,6 +163,8 @@ export class PaymentsService {
       });
     }
     paymentMethod.id = createPaymentDto.paymentMethodId;
+    const users = new User();
+    user.id = userId;
     const payments = new Payment();
     payments.amount = createPaymentDto.amount;
     payments.status = PAYMENT_STATUS.PENDING;
