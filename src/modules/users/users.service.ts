@@ -13,14 +13,22 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { paginate, Pagination } from 'nestjs-typeorm-paginate';
 import { Role } from '../roles/constants/role.enum';
+import { Payment } from '../payments/entities/payment.entity';
+import { PaymentDetail } from '../payment_details/entities/payment_detail.entity';
+import { UserAnswer } from '../user_answers/entities/user_answer.entity';
+import { UserAnswersService } from '../user_answers/user_answers.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-    private datasource: DataSource,
-  ) {}
+    @InjectRepository(Payment)
+    private paymentRepository: Repository<Payment>,
+    @InjectRepository(PaymentDetail)
+    private paymentDetailRepository: Repository<PaymentDetail>,
+  ) // private datasource: DataSource,
+  {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     try {
@@ -63,19 +71,32 @@ export class UsersService {
     //   ];
     // }
     if (email.trim() !== '' && name.trim() !== '' && role.trim() !== '') {
-      searchCondition.where = { email: Like(`%${email.trim().trim()}%`), name: Like(`%${name}%`), role: role as Role  };
+      searchCondition.where = {
+        email: Like(`%${email.trim().trim()}%`),
+        name: Like(`%${name}%`),
+        role: role as Role,
+      };
     } else if (name.trim() !== '' && role.trim() !== '') {
-      searchCondition.where = { name: Like(`%${name.trim()}%`), role: role as Role  };
+      searchCondition.where = {
+        name: Like(`%${name.trim()}%`),
+        role: role as Role,
+      };
     } else if (role.trim() !== '' && email.trim() !== '') {
-      searchCondition.where = { role: role as Role , email: Like(`%${email.trim()}%`)};
-    }else if (name.trim() !== '' && email.trim() !== '') {
-      searchCondition.where = { name: Like(`%${name.trim()}%`) , email: Like(`%${email.trim()}%`)};
-    } else if (email.trim() !== ''){
-      searchCondition.where = {  email: Like(`%${email.trim()}%`)};
-    }else if (name.trim() !== ''){
-      searchCondition.where = {  name: Like(`%${name.trim()}%`)};
-    }else if (role.trim() !== ''){
-      searchCondition.where = {  role: role as Role };
+      searchCondition.where = {
+        role: role as Role,
+        email: Like(`%${email.trim()}%`),
+      };
+    } else if (name.trim() !== '' && email.trim() !== '') {
+      searchCondition.where = {
+        name: Like(`%${name.trim()}%`),
+        email: Like(`%${email.trim()}%`),
+      };
+    } else if (email.trim() !== '') {
+      searchCondition.where = { email: Like(`%${email.trim()}%`) };
+    } else if (name.trim() !== '') {
+      searchCondition.where = { name: Like(`%${name.trim()}%`) };
+    } else if (role.trim() !== '') {
+      searchCondition.where = { role: role as Role };
     }
 
     const [users, count] = await this.usersRepository.findAndCount(
@@ -142,7 +163,30 @@ export class UsersService {
   }
 
   async remove(id: number): Promise<string> {
+    // Xoá tất cả các payment details liên quan đến user
+    const payments = await this.paymentRepository.find({
+      where: { user: { id: id } },
+      relations: ['paymentDetail'],
+    });
+
+    for (const payment of payments) {
+      const paymentDetails = await this.paymentDetailRepository.find({
+        where: { payment: { id: payment.id } },
+      });
+
+      for (const paymentDetail of paymentDetails) {
+        await this.paymentDetailRepository.remove(paymentDetail);
+      }
+    }
+
+    // Xoá tất cả các payment liên quan đến user
+    for (const payment of payments) {
+      await this.paymentRepository.remove(payment);
+    }
+
+    // Xoá user
     await this.usersRepository.delete(id);
+
     return 'User deleted successfully';
   }
 

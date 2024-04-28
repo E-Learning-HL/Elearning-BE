@@ -1,6 +1,13 @@
 import { BaseEntity } from 'src/database/base/base.entity';
 import { Assignment } from 'src/modules/assignments/entities/assignment.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
 import { FileEntity } from 'src/modules/file/entities/file.entity';
 import { Question } from 'src/modules/questions/entities/question.entity';
 import { TASK_TYPE } from '../constants/task-type.enum';
@@ -13,6 +20,11 @@ export class Task extends BaseEntity {
     nullable: true,
   })
   content: string;
+
+  @Column({
+    nullable: true,
+  })
+  time: number;
 
   @ManyToOne(() => Assignment, (assignment) => assignment.task, {
     onDelete: 'CASCADE',

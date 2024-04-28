@@ -311,7 +311,17 @@ export class UserAnswersService {
     return userAnswer
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} userAnswer`;
+  async removeAllByUserId(userId: number): Promise<void> {
+    // Tìm tất cả user answer của user có id là userId
+    const userAnswers = await this.userAnswerRepository.find({
+      where: { user: { id: userId } },
+    });
+
+    // Xoá tất cả các user answer tìm được
+    for (const userAnswer of userAnswers) {
+      await this.userAnswerRepository.remove(userAnswer);
+    }
   }
+
+
 }

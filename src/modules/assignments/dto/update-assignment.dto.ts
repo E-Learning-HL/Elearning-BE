@@ -82,6 +82,11 @@ class Task {
   @IsString()
   content: string;
 
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  time: number;
+
   @ApiProperty({
     type: [File],
   })

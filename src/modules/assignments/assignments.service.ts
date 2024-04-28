@@ -86,6 +86,7 @@ export class AssignmentsService {
       task.content = taskDto.content;
       task.assignment = assignmentResult;
       task.taskType = taskDto.taskType;
+      task.time = taskDto.time;
 
       const taskResult = await this.taskRepository.save(task);
 
@@ -448,6 +449,7 @@ export class AssignmentsService {
           const task = new Task();
           task.taskType = itemTask.taskType;
           task.assignment = assignmentResult;
+          task.time = itemTask.time;
           if (itemTask.content !== undefined) {
             task.content = itemTask.content;
           }
@@ -523,6 +525,7 @@ export class AssignmentsService {
             throw new NotFoundException('task not found');
           }
           task.content = itemTask.content;
+          task.time = itemTask.time;
           const taskResult = await this.taskRepository.save(task);
 
           // Lấy các câu hỏi của task

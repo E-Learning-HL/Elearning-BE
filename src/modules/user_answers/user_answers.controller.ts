@@ -58,8 +58,4 @@ export class UserAnswersController {
     return this.userAnswersService.updateUserAnswer(req.user.id, updateUserAnswerDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userAnswersService.remove(+id);
-  }
 }

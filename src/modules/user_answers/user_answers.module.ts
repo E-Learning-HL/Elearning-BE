@@ -12,6 +12,7 @@ import { User } from '../users/entities/user.entity';
 @Module({
   controllers: [UserAnswersController],
   providers: [UserAnswersService],
+  exports : [UserAnswersService],
   imports : [TypeOrmModule.forFeature([UserAnswer, Score, Answer,User, Question, Task])]
 })
 export class UserAnswersModule {}
