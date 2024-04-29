@@ -141,7 +141,11 @@ export class PaymentsService {
     // Kiểm tra xem user đã mua khóa học này chưa
     for (const item of createPaymentDto.course) {
       const enrolment = await this.enrolmentRepository.findOne({
-        where: { user: { id: userId }, course: { id: item.courseId } },
+        where: {
+          user: { id: userId },
+          course: { id: item.courseId },
+          isActive: true,
+        },
       });
       if (enrolment) {
         throw new BadRequestException({
@@ -270,20 +274,44 @@ export class PaymentsService {
       const coursePaymentDetail =
         await this.paymentDetailService.findCoursePayments(payment.id);
       for (const courseItem of coursePaymentDetail) {
-        const course = new Course();
-        course.id = courseItem?.course.id;
+        // const course = new Course();
+        // course.id = courseItem?.course.id;
 
-        const user = new User();
-        user.id = payment?.user.id;
+        // const user = new User();
+        // user.id = payment?.user.id;
 
-        const enrolment = new Enrolment();
-        enrolment.course = course;
-        enrolment.user = user;
-        enrolment.isActive = true;
+        // const enrolment = new Enrolment();
+        // enrolment.course = course;
+        // enrolment.user = user;
+        // enrolment.isActive = true;
 
-        console.log(`course : ${enrolment.course}, user : ${enrolment.user}`);
+        // console.log(`course : ${enrolment.course}, user : ${enrolment.user}`);
 
-        await this.enrolmentRepository.save(enrolment);
+        // await this.enrolmentRepository.save(enrolment);
+
+        // Kiểm tra xem user đã đăng ký khóa học này chưa
+        const enrolmentExists = await this.enrolmentRepository.findOne({
+          where: {
+            course: { id: courseItem.course.id },
+            user: { id: payment.user.id },
+            isActive: true,
+          },
+        });
+        if (!enrolmentExists) {
+          // Tạo mới enrolment nếu chưa tồn tại
+          const course = new Course();
+          course.id = courseItem.course.id;
+
+          const user = new User();
+          user.id = payment.user.id;
+
+          const enrolment = new Enrolment();
+          enrolment.course = course;
+          enrolment.user = user;
+          enrolment.isActive = true;
+
+          await this.enrolmentRepository.save(enrolment);
+        }
       }
     }
     try {

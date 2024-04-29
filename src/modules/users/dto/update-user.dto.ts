@@ -1,28 +1,40 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsBoolean, Length, MaxLength, MinLength } from 'class-validator';
+import {
+  IsString,
+  IsBoolean,
+  Length,
+  MaxLength,
+  MinLength,
+  IsOptional,
+} from 'class-validator';
 
-export class UpdateUserDto  {
-    @ApiProperty({
-        example : "admin"
-    })
-    @IsString()
-    name: string;
+export class UpdateUserDto {
+  @ApiProperty({
+    example: 'admin',
+  })
+  @IsString()
+  @IsOptional()
+  name: string;
 
-    @ApiProperty()
-    @IsBoolean()
-    isActive: boolean;
+  @ApiProperty()
+  @IsBoolean()
+  @IsOptional()
+  isActive: boolean;
 
-    @ApiProperty()
-    @IsString()
-    @Length(10)
-    phone: string;
+  @ApiProperty()
+  @IsString()
+  @Length(10)
+  @IsOptional()
+  phone: string;
 
-    @ApiProperty()
-    @IsString()
-    address: string;
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  address: string;
 
-    @ApiProperty()
-    @MinLength(8)
-    @MaxLength(20)
-    password: string;
+  @ApiProperty()
+  @MinLength(8)
+  @MaxLength(20)
+  @IsOptional()
+  password: string;
 }

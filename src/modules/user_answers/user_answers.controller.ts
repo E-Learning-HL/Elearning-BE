@@ -27,35 +27,30 @@ import { Permission } from '../permissions/constants/permission.enum';
 export class UserAnswersController {
   constructor(private readonly userAnswersService: UserAnswersService) {}
 
-  @Roles(Role.USER, Role.SUPER_ADMIN)
+  @Roles(Role.USER, Role.SUPER_ADMIN, Role.ADMIN)
   @Permissions(Permission.CREATE)
   @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Post()
-  create(
-    @Req() req,
-    @Body() createUserAnswerDto: CreateUserAnswerDto) {
-    return this.userAnswersService.create(req.user.id,createUserAnswerDto);
+  create(@Req() req, @Body() createUserAnswerDto: CreateUserAnswerDto) {
+    return this.userAnswersService.create(req.user.id, createUserAnswerDto);
   }
 
-  @Roles(Role.USER, Role.SUPER_ADMIN)
+  @Roles(Role.USER, Role.SUPER_ADMIN, Role.ADMIN)
   @Permissions(Permission.READ)
   @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get('get-history-answer/:taskId')
-  getHistoryAnswer(
-    @Req() req,
-    @Param('taskId') taskId: number) {
+  getHistoryAnswer(@Req() req, @Param('taskId') taskId: number) {
     return this.userAnswersService.getUserAnswer(req.user.id, taskId);
   }
 
-  @Roles(Role.USER, Role.SUPER_ADMIN)
+  @Roles(Role.USER, Role.SUPER_ADMIN, Role.ADMIN)
   @Permissions(Permission.UPDATE)
   @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Patch('redo-test')
-  update(
-    @Req() req,
-    @Body() updateUserAnswerDto: UpdateUserAnswerDto,
-  ) {
-    return this.userAnswersService.updateUserAnswer(req.user.id, updateUserAnswerDto);
+  update(@Req() req, @Body() updateUserAnswerDto: UpdateUserAnswerDto) {
+    return this.userAnswersService.updateUserAnswer(
+      req.user.id,
+      updateUserAnswerDto,
+    );
   }
-
 }
