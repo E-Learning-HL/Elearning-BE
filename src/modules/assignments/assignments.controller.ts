@@ -93,12 +93,14 @@ export class AssignmentsController {
     return this.assignmentsService.findOne(id);
   }
 
-  // @Roles(Role.SUPER_ADMIN, Role.ADMIN)
-  // @Permissions(Permission.READ)
-  // @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.USER)
+  @Permissions(Permission.READ)
+  @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
   @Get('get-exam/:courseId')
-  findAllAssignmentByCourse(@Param('courseId') courseId: number) {
-    return this.assignmentsService.findAllCourse(courseId);
+  findAllAssignmentByCourse(
+    @Req() req ,
+    @Param('courseId') courseId: number) {
+    return this.assignmentsService.findAllCourse(req.user.id, courseId);
   }
 
   @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.USER)

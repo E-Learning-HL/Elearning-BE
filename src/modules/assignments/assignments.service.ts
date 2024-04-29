@@ -23,6 +23,7 @@ import { FileEntity } from '../file/entities/file.entity';
 import { Lesson } from '../lessons/entities/lesson.entity';
 import { ASSIGNINMENT_TYPE } from './constants/assignment-type.enum';
 import { UserAnswer } from '../user_answers/entities/user_answer.entity';
+import { Score } from '../scores/entities/score.entity';
 
 @Injectable()
 export class AssignmentsService {
@@ -41,6 +42,8 @@ export class AssignmentsService {
     private fileRepository: Repository<FileEntity>,
     @InjectRepository(UserAnswer)
     private userAnswerRepository: Repository<UserAnswer>,
+    @InjectRepository(Score)
+    private scoreRepository: Repository<Score>,
     private readonly fileService: FileService,
   ) {}
 
@@ -221,7 +224,7 @@ export class AssignmentsService {
   //   }
   // }
 
-  async findAllCourse(courseId: number): Promise<{
+  async findAllCourse(userId : number ,courseId: number): Promise<{
     course: any;
     listAssignment: {
       id: number;
@@ -249,6 +252,7 @@ export class AssignmentsService {
           'task.question',
           'task.question.answer',
           'task.score',
+          'task.score.user',
           'task.file',
         ],
       });
@@ -263,14 +267,22 @@ export class AssignmentsService {
       const course = assignments[0].course;
 
       // Tạo mảng mới chứa thông tin của từng assignment và trường isChecked
+      const completedScores = await this.scoreRepository.find({
+        where: {
+          user: { id: userId },
+        },
+        relations: ['task'],
+      });
+  
       const listAssignment = assignments.map((assignment) => {
-        let isChecked = false;
-        for (const task of assignment.task) {
-          if (task.score !== null) {
-            isChecked = true;
-            break;
-          }
-        }
+        const tasks = assignment.task;
+      
+        const completedTasksForAssignment = tasks.filter((task) =>
+          completedScores.some((score) => score.task.id === task.id)
+        );
+      
+        const isChecked = completedTasksForAssignment.length > 0;
+      
         return {
           id: assignment.id,
           nameAssignment: assignment.nameAssignment,
@@ -278,10 +290,11 @@ export class AssignmentsService {
           assignmentType: assignment.assignmentType,
           isActive: assignment.isActive,
           course: assignment.course,
-          task: assignment.task,
+          task: tasks,
           isChecked,
         };
       });
+      
 
       // Trả về đối tượng chứa thông tin khóa học và danh sách bài tập, mỗi phần tử có biến isChecked
       return {
@@ -309,6 +322,7 @@ export class AssignmentsService {
             id: task.id,
             content: task.content,
             taskType: task.taskType,
+            time : task.time,
             question: task.question.map((question) => ({
               id: question.id,
               title: question.title,

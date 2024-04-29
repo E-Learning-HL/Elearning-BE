@@ -10,6 +10,7 @@ import { Question } from '../questions/entities/question.entity';
 import { Answer } from '../answers/entities/answer.entity';
 import { Lesson } from '../lessons/entities/lesson.entity';
 import { UserAnswer } from '../user_answers/entities/user_answer.entity';
+import { Score } from '../scores/entities/score.entity';
 
 @Module({
   controllers: [AssignmentsController],
@@ -22,7 +23,8 @@ import { UserAnswer } from '../user_answers/entities/user_answer.entity';
       Answer,
       FileEntity,
       Lesson,
-      UserAnswer
+      UserAnswer,
+      Score
     ]),
   ],
   exports: [AssignmentsService],
