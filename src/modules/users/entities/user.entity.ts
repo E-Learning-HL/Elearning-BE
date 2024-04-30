@@ -44,7 +44,8 @@ export class User extends BaseEntity {
   @Column({
     type: 'enum',
     enum: Role,
-    default: Role.USER, // Set default role
+    // default: Role.USER, // Set default role
+    // nullable : true
   })
   role: Role;
 

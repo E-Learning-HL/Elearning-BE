@@ -141,7 +141,7 @@ export class UsersController {
   @Roles(Role.SUPER_ADMIN)
   @Permissions(Permission.UPDATE)
   @UseGuards(JwtAuthGuard, RoleGuard, PermissionGuard)
-  @Put(':id')
+  @Patch(':id')
   async updateUser(
     @Param('id') id: number,
     @Body() updateUserDto: UpdateUserDto,
@@ -149,6 +149,7 @@ export class UsersController {
     try {
       const updatedUser = await this.usersService.updateUser(id, updateUserDto);
       return {
+        status : HttpStatus.OK,
         message: 'User updated successfully',
         user: updatedUser,
       };

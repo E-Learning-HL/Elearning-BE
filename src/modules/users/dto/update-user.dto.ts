@@ -7,6 +7,7 @@ import {
   MinLength,
   IsOptional,
 } from 'class-validator';
+import { Role } from 'src/modules/roles/constants/role.enum';
 
 export class UpdateUserDto {
   @ApiProperty({
@@ -37,4 +38,9 @@ export class UpdateUserDto {
   @MaxLength(20)
   @IsOptional()
   password: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  role: Role;
 }

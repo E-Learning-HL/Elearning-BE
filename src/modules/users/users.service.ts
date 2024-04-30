@@ -144,7 +144,8 @@ export class UsersService {
     }
     user.name = updateUserDto.name;
     user.address = updateUserDto.address;
-    user.phone = updateUserDto.phone;
+    // user.phone = updateUserDto.phone;
+    user.role = updateUserDto.role;
     user.isActive = updateUserDto.isActive;
 
     if (updateUserDto.password) {
